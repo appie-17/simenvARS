@@ -1,14 +1,16 @@
-import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
+from autograd import grad
+import autograd.numpy as np
+
+
 
 def rosenbrock(X):
     A = np.zeros(X.shape[1])
     B = 10 * np.ones(X.shape[1])
     return np.square(A - X[0]) + B * np.square((X[1] - np.square(X[0])))
-
 
 def rosenbrock_grad(X):
     A = np.zeros(X.shape[1])
@@ -42,7 +44,7 @@ def plotSurface(rn_range, benchmark_function):
     
     Z = Z.reshape(dim)
     # Plot the surface.
-    surf = ax.plot_surface(X, Y, Z, linewidths=0, cmap='Greys', alpha=0.9)
+    surf = ax.plot_surface(X, Y, Z, linewidths=0, cmap='Greys', alpha=0.4)
     fig.colorbar(surf, shrink=0.5, aspect=5)
     # Customize the z axis.
     # ax.zaxis.set_major_locator(LinearLocator(10))
@@ -50,15 +52,20 @@ def plotSurface(rn_range, benchmark_function):
     # Add a color bar which maps values to colors.
     return ax
 
-
-def gradientDescent(num_iter, rn_range, benchmark_function, benchmark_function_grad):
+#Give optional derivative function under args
+def gradientDescent(num_iter, rn_range, benchmark_function, gradient = []):
     # Initialise X
+    if not gradient:
+        gradient = grad(benchmark_function)
+
+
     X = np.random.rand(2,1)*rn_range[0]+rn_range[1]
+
     # X = np.array([[rn_range[1]], [rn_range[1]]])
     # Gradient descent
     output = np.array([X[0], X[1], benchmark_function(X)])
     for _ in range(num_iter):
-        X = X - step_size * benchmark_function_grad(X)
+        X = X - step_size * gradient(X)
         output = np.hstack((output, [X[0], X[1], benchmark_function(X)]))
 
     return output
@@ -67,39 +74,50 @@ def particleSwarmOptimisation(num_iter, num_particles, ndim, rn_range, benchmark
     # PSO initialisation particle_best (Sp_best), group_best(Sg_best), 
     #   particle(Sp), particle_velocity(Vp)
 
-    Sp = np.random.rand(num_particles,ndim)*rn_range[0]+rn_range[1]
-    Sp_best = Sp
+    
+    Sp = np.zeros([num_particles,ndim])
+    Sp_best = np.zeros([num_particles,ndim])
     Sg_best = np.zeros(ndim).reshape(1,ndim)
     Vp = np.zeros((num_particles,ndim))
-    a, b, c = 0.3, 0.3, 0.3
-
+    a, b, c = 0.4, 2, 2
+    Sp = np.random.rand(num_particles,ndim)*rn_range[0]+rn_range[1]
     output = []
     for i in range(num_particles):
 
         if output == []:
-            output = np.array([[Sp[i][0]], [Sp[i][1]], benchmark_function(Sp[i].reshape(ndim,1))])
-            Sg_best = Sp[i]
+            # Sp[i] = np.random.rand(num_particles,ndim)*rn_range[0]+rn_range[1]
+            Sp_best[i] = Sp[i]
+            # output = np.array([[Sp[i][0]], [Sp[i][1]], benchmark_function(Sp[i].reshape(ndim,1))])
+            Sg_best_temp = Sp[i]
+
 
         else:
-            output = np.hstack((output, np.array([[Sp[i][0]], [Sp[i][1]], benchmark_function(Sp[i].reshape(ndim,1))])))
-            if benchmark_function(Sp[i].reshape(ndim,1)) <= benchmark_function(Sg_best.reshape(ndim,1)):
-                Sg_best = Sp[i]
-
+            # Sp[i] = np.random.rand(num_particles,ndim)*rn_range[0]+rn_range[1]
+            Sp_best[i] = Sp[i]
+            
+            if benchmark_function(Sp[i].reshape(ndim,1)) <= benchmark_function(Sg_best_temp.reshape(ndim,1)):
+                Sg_best_temp = Sp[i]
+        Sg_best = Sg_best_temp
+        output = np.array([[Sg_best[0]], [Sg_best[1]], benchmark_function(Sg_best.reshape(ndim,1))])    
     # Particle Swarm Optimisation
     for _ in range(num_iter):
         
         for i in range(num_particles):
             
-            Vp[i] = a * Vp[i] + b*np.random.rand()*Sp_best[i] + c*np.random.rand()*Sg_best
-            Sp[i] = Sp[i] * Vp[i]
+            Vp[i] = a * Vp[i] + b*np.random.rand()* (Sp_best[i] - Sp[i]) + c*np.random.rand()*(Sg_best - Sp[i])
+            
+            Sp[i] = Sp[i] + Vp[i]
             if benchmark_function(Sp[i].reshape(ndim,1)) <= benchmark_function(Sp_best[i].reshape(ndim,1)):
                 Sp_best[i] = Sp[i]
 
             if benchmark_function(Sp[i].reshape(ndim,1)) <= benchmark_function(Sg_best.reshape(ndim,1)):
-                Sg_best = Sp[i]
-                    
-            output = np.hstack((output,[[Sp[i][0]],[Sp[i][1]],benchmark_function(Sp[i].reshape(ndim,1))]))
-            
+                # print('Position', benchmark_function(Sp[i].reshape(ndim,1)))
+                # print('Best',benchmark_function(Sg_best.reshape(ndim,1)))
+                Sg_best_temp = Sp[i]
+        Sg_best = Sg_best_temp            
+        output = np.hstack((output,[[Sg_best[0]],[Sg_best[1]],benchmark_function(Sg_best.reshape(ndim,1))]))
+        
+        
     return output
 
 def evolutionaryAlgorithm(num_iter, initial_population, ndim, rn_range, benchmark_function, offspring):
@@ -127,50 +145,49 @@ def evolutionaryAlgorithm(num_iter, initial_population, ndim, rn_range, benchmar
     return output
 
 #Parameters
-num_iter = 250
+num_iter = 100
 step_size = 0.001
-num_particles = 20
+num_particles = 100
 ndim = 2
 initial_population = 1000
 offspring = 0.2
 #random number range [0] for multiplication and [1] for substraction
-rn_range = [10,-5]
+rn_range = [4,-2]
 scatter_size = 50
 
-
 #Benchmark on rosenbrock
-ax = plotSurface(rn_range, rosenbrock)
+# ax = plotSurface(rn_range, rosenbrock)
+# GD_plot = gradientDescent(num_iter, rn_range, rosenbrock)
+# ax.scatter(GD_plot[0], GD_plot[1], GD_plot[2], c='b', marker='x', s=scatter_size)
 
-GD_plot = gradientDescent(num_iter, rn_range, rosenbrock, rosenbrock_grad)
-ax.scatter(GD_plot[0], GD_plot[1], GD_plot[2], c='b', marker='x', s=scatter_size)
+# PSO_plot = particleSwarmOptimisation(num_iter, num_particles, ndim, rn_range, rosenbrock)
+# ax.scatter(PSO_plot[0], PSO_plot[1], PSO_plot[2], c='r', marker='x', s=scatter_size)
 
-PSO_plot = particleSwarmOptimisation(num_iter, num_particles, ndim, rn_range, rosenbrock)
-ax.scatter(PSO_plot[0], PSO_plot[1], PSO_plot[2], c='r', marker='x', s=scatter_size)
-
-EA_plot = evolutionaryAlgorithm(num_iter, initial_population, ndim, rn_range, rosenbrock, offspring)
-ax.scatter(EA_plot[0], EA_plot[1], EA_plot[2], c='g', marker='x', s=scatter_size)
-
-plt.show()
-
-fmt = '{:<12}{:<25}{:<35}{}'
-print(fmt.format("Iteration", "Gradient descent ", "Particle Swarm Optimisation", "Evolutionary Algorithm"))
-[print(fmt.format(i, gd, pso, ea)) for i, (gd, pso, ea) in enumerate(zip(GD_plot[2], PSO_plot[2], EA_plot[2]))]
-
-
-#Benchmark on rastrigin
-# plot = plotSurface(rn_range, rastrigin)
-
-# GD_plot = gradientDescent(num_iter, rn_range, rastrigin, rastrigin_grad)
-# plot.scatter(GD_plot[0], GD_plot[1], GD_plot[2], c='b', marker='x', s=scatter_size)
-
-# PSO_plot = particleSwarmOptimisation(num_iter, num_particles, ndim, rn_range, rastrigin)
-# plot.scatter(PSO_plot[0], PSO_plot[1], PSO_plot[2], c='r', marker='x', s=scatter_size)
-
-# EA_plot = evolutionaryAlgorithm(num_iter, initial_population, ndim, rn_range, rastrigin, offspring)
-# plot.scatter(EA_plot[0], EA_plot[1], EA_plot[2], c='g', marker='x', s=scatter_size)
+# EA_plot = evolutionaryAlgorithm(num_iter, initial_population, ndim, rn_range, rosenbrock, offspring)
+# ax.scatter(EA_plot[0], EA_plot[1], EA_plot[2], c='g', marker='x', s=scatter_size)
 
 # plt.show()
 
 # fmt = '{:<12}{:<25}{:<35}{}'
 # print(fmt.format("Iteration", "Gradient descent ", "Particle Swarm Optimisation", "Evolutionary Algorithm"))
 # [print(fmt.format(i, gd, pso, ea)) for i, (gd, pso, ea) in enumerate(zip(GD_plot[2], PSO_plot[2], EA_plot[2]))]
+
+
+# #Benchmark on rastrigin
+# ax = plotSurface(rn_range, rastrigin)
+
+# GD_plot = gradientDescent(num_iter, rn_range, rastrigin)
+# ax.scatter(GD_plot[0], GD_plot[1], GD_plot[2], c='b', marker='x', s=scatter_size)
+
+# PSO_plot = particleSwarmOptimisation(num_iter, num_particles, ndim, rn_range, rastrigin)
+# ax.scatter(PSO_plot[0], PSO_plot[1], PSO_plot[2], c='g', marker='x', s=scatter_size)
+
+EA_plot = evolutionaryAlgorithm(num_iter, initial_population, ndim, rn_range, rastrigin, offspring)
+# ax.scatter(EA_plot[0], EA_plot[1], EA_plot[2], c='g', marker='x', s=scatter_size)
+
+# plt.show()
+
+# fmt = '{:<12}{:<25}{:<35}{}'
+# print(fmt.format("Iteration", "Gradient descent ", "Particle Swarm Optimisation", "Evolutionary Algorithm"))
+# [print(fmt.format(i, gd, pso, ea)) for i, (gd, pso, ea) in enumerate(zip(GD_plot[2], PSO_plot[2], EA_plot[2]))]
+print(EA_plot[2])
