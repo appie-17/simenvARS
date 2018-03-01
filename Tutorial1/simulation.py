@@ -1,8 +1,10 @@
 import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib import collections  as mc
 
 #Check if point c lies between line (a,b)
 def collision(walls,pos):
-	eps = 0.01
+	eps = 0.02
 	for wall in walls:
 		ab = np.sqrt((wall[0,0] - wall[1,0])**2 + (wall[0,1] - wall[1,1])**2)
 		
@@ -17,62 +19,72 @@ def collision(walls,pos):
 			return True
 		
 
-def movement(x,y,R,omega, theta):
-		deltaT = 1
-		
-		ICCx = x - R*np.sin(theta)
-		ICCy = y + R*np.cos(theta)
-		x = np.cos(omega*deltaT) * (x-ICCx) + ICCx
-		y = np.sin(omega*deltaT) * (y-ICCy) + ICCy
-		theta = theta + omega*deltaT 
+def movement(Vl,Vr,pos,theta):
+		dT = 0.1
+		x, y = pos[0], pos[1]
+		omega = (Vr-Vl)/l	
+		if Vl==Vr:
+			V = (Vl+Vr)/2
+			x = x + V * np.cos(theta*dT)
+			y = y + V * np.sin(theta*dT)
+			theta = theta
+		else:
+			R = l/2 * ((Vl+Vr)/(Vr-Vl))
+			ICCx = x - R*np.sin(theta)
+			ICCy = y + R*np.cos(theta)
+			x = np.cos(omega*dT)*(x-ICCx)-np.sin(omega*dT)*(y-ICCy)+ICCx
+			y = np.sin(omega*dT)*(x-ICCy)+np.cos(omega*dT)*(y-ICCy)+ICCy
+			theta = theta + omega*dT 
 		pos_new = [x,y]
-		angle = theta
-		return pos_new, angle
+		return pos_new, theta
 
 
 #Velicty left- and right wheel between [-1,1]
 
 #Initialise positions for 12 sensors, still need to apply omega as start angle
-def init_sensors(pos,omega):
-	sensors = np.zeros([12,2,2])
-	unit_circle = 0
+def init_sensors(pos,theta):
+	sensors = np.zeros([12,2,2])	
 	for i in range(len(sensors)):
-		sensors[i] = [[pos[0] + np.sin(unit_circle*2*np.pi)*robot_rad, 
-		pos[1] + np.cos(unit_circle*2*np.pi)*robot_rad],
-		[pos[0] + np.sin(unit_circle*2*np.pi)*(robot_rad+sens_range), 
-		pos[1] + np.cos(unit_circle*2*np.pi)*(robot_rad+sens_range)]]
-		unit_circle += 1/12
+		sensors[i] = [[pos[0] + np.sin(theta)*robot_rad, 
+		pos[1] + np.cos(theta)*robot_rad],
+		[pos[0] + np.sin(theta)*(robot_rad+sens_range), 
+		pos[1] + np.cos(theta)*(robot_rad+sens_range)]]
+		theta += 1/6 * np.pi
 	return sensors
 
 def wall_distance(sensors,walls):
 	distance = np.zeros(12)
+	i = 0
 	for sensor in sensors:
-		i = 0
+		
 		for wall in walls:
 			x1,y1,x2,y2 = sensor[0,0],sensor[0,1],sensor[1,0],sensor[1,1]
 			x3,y3,x4,y4 = wall[0,0],wall[0,1],wall[1,0],wall[1,1]
 			#Repair vertical wall/sensor
 			if x1 == x2:
-				x1 += 0.1
+				x1 += 0.001
 			if x3 == x4:
-				x3 += 0.1
+				x3 += 0.001
 			#Calculate intersection point between wall and sensor line
 			Px = ((x1*y2-y1*x2)*(x3-x4)-(x1-x2)*(x3*y4-y3*x4))/((x1-x2)*(y3-y4)-(y1-y2)*(x3-x4))
 			Py = ((x1*y2-y1*x2)*(y3-y4)-(y1-y2)*(x3*y4-y3*x4))/((x1-x2)*(y3-y4)-(y1-y2)*(x3-x4))
 			#Check for true intersection between walls and sensors
-			if (Px <= np.minimum(x1,x2)) | (Px >= np.maximum(x1,x2)):
+			if (Px < np.minimum(x1,x2)) | (Px > np.maximum(x1,x2)):
+				pass
+			elif (Px < np.minimum(x3,x4)) | (Px > np.maximum(x3,x4)):
+				pass
+			else: 
+				distance[i] = np.sqrt((x1-Px)**2+(y1-Py)**2)
+				i+=1
 				break
-			if (Px <= np.minimum(x3,x4)) | (Px >= np.maximum(x3,x4)):
-				break
-			distance[i] = np.sqrt((x1-Px)**2+(y1-Py)**2)
-		i += 1
+		i +=1	
 	return distance	
 
 #Determine range of square environment polygon
 env_range = 10
-pos_start = [4,3]
-robot_rad = 0.5
-sens_range = 5
+pos_start = [2,2]
+robot_rad = 0.25
+sens_range = 1
 #add walls to 4x2x2d array, giving start- & end-coordinates 
 #for each wall surrounding the environment
 walls = np.array([[[0,0],[0,env_range]]])
@@ -80,20 +92,37 @@ walls = np.vstack((walls,np.array([[[0,0],[env_range,0]]])))
 walls = np.vstack((walls,np.array([[[env_range,0],[env_range,env_range]]])))
 walls = np.vstack((walls,np.array([[[0,env_range],[env_range,env_range]]])))
 
-l = robot_rad
+l = robot_rad*2
 pos = pos_start
-theta = np.arctan(pos[1]/pos[0])/(2*np.pi)*360
-for _ in range(100):
-	print(pos)
-	Vl = np.random.rand()-0.5
-	Vr = np.random.rand()-0.5
-	R = l/2 * (Vl+Vr)/(Vr-Vl)
-	omega = (Vr-Vl)/l
-	pos, angle = movement(pos[0],pos[1],R,omega,theta)
+theta = np.arctan(pos[1]/pos[0])
+
+#Run simulation
+plt.ion()
+ax = plt.subplot(111)
+plt.xlim(-12,12)
+plt.ylim(-12,12)
+lc_walls = mc.LineCollection(walls)
+
+for _ in range(1000):
+	Vl = np.random.randint(0,11)/100
+	Vr = np.random.randint(0,11)/100
+	pos, theta = movement(Vl,Vr,pos,theta)
 	if collision(walls,pos):
+		theta += 1/2*np.pi
+	# while collision(walls,pos):
 		print('collision')
-		Vl = 0
-		Vr = 0
-	sensors = init_sensors(pos,omega)
+		pos, theta = movement(Vl,Vr,pos,theta)
+	sensors = init_sensors(pos,theta)
 	sens_distance = wall_distance(sensors,walls)
+	ax.clear()
+	_ = plt.xlim(-2,12)
+	_ = plt.ylim(-2,12)
+	robot = plt.Circle(pos,robot_rad)
+	# ax.scatter(pos[0],pos[1],s=(robot_rad*40)**2)
+	lc_sensors = mc.LineCollection(sensors)
+	_ = ax.add_artist(robot)
+	_ = ax.add_collection(lc_walls)
+	_ = ax.add_collection(lc_sensors)
+	plt.pause(1e-40)
 	print(sens_distance)
+	
