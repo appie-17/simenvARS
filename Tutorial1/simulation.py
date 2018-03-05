@@ -69,6 +69,7 @@ def wall_distance(sensors, walls):
 
 # Velocity left- and right wheel between [-1,1]
 def movement(Vl, Vr, pos, theta):
+
 	l = robot_rad*2
 	x, y = pos[0], pos[1]
 	omega = (Vr - Vl) / l
@@ -98,9 +99,11 @@ def ann(v_left, v_right, sensor_output):
     :return: new velocities
     """
     # append v_left and v_right to sensor_output and set correct shape
-    input_vector = np.reshape(np.append(sensor_output, [v_left, v_right]), (14, 1))
+    input_vector = np.append(sensor_output, [v_left, v_right, 1])
     # multiply input_input vector by weights and put through tanh activation function
     output = np.tanh(np.dot(weights, input_vector))
+    
+    
     # return vector of 2x1; v_left = output[0][0] v_right = output[1][0]
     return output
 
@@ -134,20 +137,24 @@ def simulation(env_range,pos,robot_rad,sens_range,dT,weights, graphics=True):
 		lc_walls = mc.LineCollection(walls)
 
 	for i in range(2000):
-		
+		# Vl, Vr = 0.05,0.05
+		# print(Vl,Vr)
 		#Calculate new position and viewing angle according to velocities
+		pos_old, theta_old = pos, theta
 		pos, theta = movement(Vl,Vr,pos,theta)
 		#Add unique positions to surface_covered
 		x,y = np.asscalar(pos[0]), np.asscalar(pos[1])
 		surface_covered.add((np.round(x),np.round(y)))
 		#When collision neglect movement orthogonal to wall only allow parralel movement
-		while collision(walls,pos):
-		# if collision(walls,pos):
+		# while collision(walls,pos):
+		if collision(walls,pos):
+			print('collision')
 			num_collisions+=1
-			theta += 1/2*np.pi
+			# theta += 1/6*np.pi
 			
-			pos, theta = movement(Vl,Vr,pos,theta)
+			# pos, theta = movement(Vl,Vr,pos,theta)
 			#Add unique positions to surface_covered
+			pos,theta = pos_old, theta_old
 			x,y = np.asscalar(pos[0]), np.asscalar(pos[1])
 			surface_covered.add((np.round(x),np.round(y)))
 		#Define 12 sensors each separated by 30 deg,2pi/12rad and calculate distance to any object
@@ -167,7 +174,8 @@ def simulation(env_range,pos,robot_rad,sens_range,dT,weights, graphics=True):
 		
 		#When 1/dT=1 run controller and calculate new velocities according to old vel. and sensor output
 		if (i*dT)%1 == 0:
-			Vl, Vr = ann(Vl,Vr,sens_distance)
+			# Vl, Vr = 0.5,0.5
+			Vl, Vr = ann(Vl,Vr,sens_distance)	
 	fitness = len(surface_covered)/(num_collisions+1)
 	return fitness#,num_collisions,len(surface_covered)
 
@@ -211,10 +219,10 @@ pos = [2,8]
 #Defin robot radius, sensor range, 1/dT for how many times to render simulation within one loop of robot controller
 robot_rad = 0.25
 sens_range = 0.5
-dT = 1
+dT = 0.4
 np.random.seed(5)
 #Initialise weights for ann
-weights = np.random.rand(2, 14)
+weights = np.random.rand(2, 15)
 '''
 Parameters to setup evolutionary algorithm
 '''
@@ -224,7 +232,7 @@ ndim=2,14
 rn_range=[20,-10]
 offspring=0.2
 # fitness,num_collisions,surface_covered = simulation(env_range,pos,robot_rad,sens_range,dT,weights, graphics=False)
-# avg = np.array([[ 3.14007371 ,-2.28499743, -1.50735333 ,-3.10024796, -2.03598207 , 1.34219161
+avg = np.array([[ 3.14007371 ,-2.28499743, -1.50735333 ,-3.10024796, -2.03598207 , 1.34219161
 ,  -0.96853389  ,1.13621073,  2.06163012 , 1.5961033 ,  0.20263131 ,-1.55570184
   ,-1.64663837 , 0.76583525],
  [-3.21968142, -0.38475494 , 1.02471362 ,-0.60703129,  2.29882853, -0.66518924
@@ -232,7 +240,7 @@ offspring=0.2
   ,-1.12155129, -1.67256361]])
 
 
-# simulation(env_range,pos,robot_rad,sens_range,dT,weights=avg)
+simulation(env_range,pos,robot_rad,sens_range,dT,weights=avg)
 output = evolutionaryAlgorithm(num_iter, population_size, ndim, rn_range, simulation, offspring)
 print(output)
 
