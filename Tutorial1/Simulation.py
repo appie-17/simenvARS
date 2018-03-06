@@ -23,17 +23,17 @@ class Simulation:
         env_range = self.env_range
         graphics = self.graphics
         # Set theta to viewing direction of robot
-        theta = np.arctan(pos[1] / pos[0])
+        theta = 0
         # add walls to 4x2x2d array, giving start- & end-coordinates
         # for each wall surrounding the environment
         walls = np.array([[[0, 0], [0, env_range]]])
         walls = np.vstack((walls, np.array([[[0, 0], [env_range, 0]]])))
         walls = np.vstack((walls, np.array([[[env_range, 0], [env_range, env_range]]])))
         walls = np.vstack((walls, np.array([[[0, env_range], [env_range, env_range]]])))
-        walls = np.vstack((walls, np.array([[[3, 3], [7, 3]]])))
-        walls = np.vstack((walls, np.array([[[3, 3], [3, 7]]])))
-        walls = np.vstack((walls, np.array([[[3, 7], [7, 7]]])))
-        walls = np.vstack((walls, np.array([[[7, 7], [7, 3]]])))
+        walls = np.vstack((walls, np.array([[[env_range/4, env_range/4], [env_range-env_range/4, env_range/4]]])))
+        walls = np.vstack((walls, np.array([[[env_range/4, env_range/4], [env_range/4, env_range-env_range/4]]])))
+        walls = np.vstack((walls, np.array([[[env_range/4, env_range-env_range/4], [env_range-env_range/4, env_range-env_range/4]]])))
+        walls = np.vstack((walls, np.array([[[env_range-env_range/4, env_range-env_range/4], [env_range-env_range/4, env_range/4]]])))
 
         # Initialise variables to measure fitness
         num_collisions = 0
@@ -65,8 +65,8 @@ class Simulation:
             sens_distance = self.wall_distance(sensors, walls)
             if graphics is True:
                 ax.clear()
-                _ = plt.xlim(-2, 12)
-                _ = plt.ylim(-2, 12)
+                _ = plt.xlim(-2, env_range+2)
+                _ = plt.ylim(-2, env_range+2)
                 robot = plt.Circle(pos, self.robot_rad)
                 linecolors = ['red' if i == 0 else 'blue' for i in range(12)]
                 lc_sensors = mc.LineCollection(sensors, colors=linecolors)
