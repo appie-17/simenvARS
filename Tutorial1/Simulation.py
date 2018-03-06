@@ -22,17 +22,18 @@ class Simulation:
         env_range = self.env_range
         graphics = self.graphics
         # Set theta to viewing direction of robot
-        theta = 0
+        theta = np.arctan(pos[1] / pos[0])
+        # theta = 0
         # add walls to 4x2x2d array, giving start- & end-coordinates
         # for each wall surrounding the environment
         walls = np.array([[[0, 0], [0, env_range]]])
         walls = np.vstack((walls, np.array([[[0, 0], [env_range, 0]]])))
         walls = np.vstack((walls, np.array([[[env_range, 0], [env_range, env_range]]])))
         walls = np.vstack((walls, np.array([[[0, env_range], [env_range, env_range]]])))
-        walls = np.vstack((walls, np.array([[[env_range/4, env_range/4], [env_range-env_range/4, env_range/4]]])))
-        walls = np.vstack((walls, np.array([[[env_range/4, env_range/4], [env_range/4, env_range-env_range/4]]])))
-        walls = np.vstack((walls, np.array([[[env_range/4, env_range-env_range/4], [env_range-env_range/4, env_range-env_range/4]]])))
-        walls = np.vstack((walls, np.array([[[env_range-env_range/4, env_range-env_range/4], [env_range-env_range/4, env_range/4]]])))
+        # walls = np.vstack((walls, np.array([[[env_range/4, env_range/4], [env_range-env_range/4, env_range/4]]])))
+        # walls = np.vstack((walls, np.array([[[env_range/4, env_range/4], [env_range/4, env_range-env_range/4]]])))
+        # walls = np.vstack((walls, np.array([[[env_range/4, env_range-env_range/4], [env_range-env_range/4, env_range-env_range/4]]])))
+        # walls = np.vstack((walls, np.array([[[env_range-env_range/4, env_range-env_range/4], [env_range-env_range/4, env_range/4]]])))
 
         # Initialise variables to measure fitness
         num_collisions = 0
@@ -43,14 +44,16 @@ class Simulation:
         if graphics is True:
             plt.ion()
             ax = plt.subplot(111)
-            plt.xlim(-12, 12)
-            plt.ylim(-12, 12)
+            plt.xlim(-2, env_range+2)
+            plt.ylim(-2, env_range+2)
             lc_walls = mc.LineCollection(walls)
 
         for i in range(self.iter_sim):
             # Calculate new position and viewing angle according to velocities
             pos_old, theta_old = pos, theta
+
             pos, theta = self.movement(Vl, Vr, pos, theta)
+            
             # Add unique positions to surface_covered
             x, y = np.asscalar(pos[0]), np.asscalar(pos[1])
             surface_covered.add((np.round(x), np.round(y)))
@@ -74,21 +77,22 @@ class Simulation:
                 _ = ax.add_collection(lc_sensors)
                 plt.pause(1e-40)
                 # When 1/dT=1 run controller and calculate new velocities according to old vel. and sensor output
-            if (i * self.dT) % 1 == 0:
-                Vl, Vr = self.ann(weights, Vl, Vr, sens_distance)
+            # if (i * self.dT) % 1 == 0:
+            Vl, Vr = self.ann(weights, Vl, Vr, sens_distance)
         fitness = len(surface_covered) / (np.log(num_collisions + 1) + 1)
-        # plt.close()
+        
         return fitness
 
     def movement(self, Vl, Vr, pos, theta):
+        
         l = self.robot_rad * 2
         dT = self.dT
         x, y = pos[0], pos[1]
         omega = (Vr - Vl) / l
         if Vl == Vr:
             V = (Vl + Vr) / 2
-            x = x + V * np.cos(theta * dT)
-            y = y + V * np.sin(theta * dT)
+            x = x + V * np.cos(theta) * dT
+            y = y + V * np.sin(theta) * dT
             theta = theta
         else:
             R = l / 2 * ((Vl + Vr) / (Vr - Vl))
@@ -99,6 +103,7 @@ class Simulation:
             theta = theta + omega * dT
         pos_new = np.array([x, y])
         return pos_new, theta
+
     def collision(self,walls,pos):
         robot_rad = self.robot_rad
         eps = 0.01
@@ -111,30 +116,6 @@ class Simulation:
             if distance <= robot_rad:
                 # print('collision')
                 return True
-
-    # def collision(self, walls, pos):
-    #     robot_rad = self.robot_rad
-    #     eps = 0.01
-    #     for wall in walls:
-    #         ab = np.sqrt((wall[0, 0] - wall[1, 0]) ** 2 + (wall[0, 1] - wall[1, 1]) ** 2)
-
-    #         ac = np.sqrt((wall[0, 0] - pos[0] - robot_rad) ** 2 + (wall[0, 1] - pos[1] - robot_rad) ** 2)
-    #         cb = np.sqrt((wall[1, 0] - pos[0] - robot_rad) ** 2 + (wall[1, 1] - pos[1] - robot_rad) ** 2)
-    #         if (ac + cb <= ab + eps) & (ac + cb >= ab - eps):
-    #             return True
-
-    #         ac2 = np.sqrt((wall[0, 0] - pos[0] - robot_rad) ** 2 + (wall[0, 1] - pos[1] + robot_rad) ** 2)
-    #         cb2 = np.sqrt((wall[1, 0] - pos[0] - robot_rad) ** 2 + (wall[1, 1] - pos[1] + robot_rad) ** 2)
-    #         if (ac2 + cb2 <= ab + eps) & (ac2 + cb2 >= ab - eps):
-    #             return True
-    #         ac3 = np.sqrt((wall[0, 0] - pos[0] + robot_rad) ** 2 + (wall[0, 1] - pos[1] - robot_rad) ** 2)
-    #         cb3 = np.sqrt((wall[1, 0] - pos[0] + robot_rad) ** 2 + (wall[1, 1] - pos[1] - robot_rad) ** 2)
-    #         if (ac3 + cb3 <= ab + eps) & (ac3 + cb3 >= ab - eps):
-    #             return True
-    #         ac4 = np.sqrt((wall[0, 0] - pos[0] - robot_rad) ** 2 + (wall[0, 1] - pos[1] + robot_rad) ** 2)
-    #         cb4 = np.sqrt((wall[1, 0] - pos[0] - robot_rad) ** 2 + (wall[1, 1] - pos[1] + robot_rad) ** 2)
-    #         if (ac4 + cb4 <= ab + eps) & (ac4 + cb4 >= ab - eps):
-    #             return True
 
     # Initialise positions for 12 sensors
     def init_sensors(self, pos, theta):
@@ -192,7 +173,8 @@ class Simulation:
         # append v_left and v_right to sensor_output and set correct shape
         input_vector = np.append(sensor_output, [v_left, v_right, 1])
         # print(input_vector)
+        output = np.tanh(np.dot(weights,input_vector))
         # multiply input_input vector by weights and put through tanh activation function
-        output = 1 / (1 + np.exp(-np.dot(weights, input_vector)))
+        # output = 1 / (1 + np.exp(-np.dot(weights, input_vector)))
         # return vector of 2x1; v_left = output[0][0] v_right = output[1][0]
         return output
