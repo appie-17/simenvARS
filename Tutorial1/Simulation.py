@@ -10,7 +10,6 @@ class Simulation:
         self.robot_rad = robot_rad
         self.pos = pos
         self.dT = dT
-
         self.env_range = env_range
         self.iter_sim = iter_sim
 
@@ -100,30 +99,42 @@ class Simulation:
             theta = theta + omega * dT
         pos_new = np.array([x, y])
         return pos_new, theta
-
-    def collision(self, walls, pos):
+    def collision(self,walls,pos):
         robot_rad = self.robot_rad
         eps = 0.01
         for wall in walls:
-            ab = np.sqrt((wall[0, 0] - wall[1, 0]) ** 2 + (wall[0, 1] - wall[1, 1]) ** 2)
-
-            ac = np.sqrt((wall[0, 0] - pos[0] - robot_rad) ** 2 + (wall[0, 1] - pos[1] - robot_rad) ** 2)
-            cb = np.sqrt((wall[1, 0] - pos[0] - robot_rad) ** 2 + (wall[1, 1] - pos[1] - robot_rad) ** 2)
-            if (ac + cb <= ab + eps) & (ac + cb >= ab - eps):
+            x0,y0 = pos[0],pos[1]
+            x1,y1,x2,y2 = wall[0,0],wall[0,1],wall[1,0],wall[1,1]
+            if x1 == x2:
+                x1+=0.001
+            distance = np.abs((y2-y1)*x0-(x2-x1)*y0+x2*y1-y2*x1)/np.sqrt((y2-y1)**2+(x2-x1)**2)
+            if distance <= robot_rad:
+                # print('collision')
                 return True
 
-            ac2 = np.sqrt((wall[0, 0] - pos[0] - robot_rad) ** 2 + (wall[0, 1] - pos[1] + robot_rad) ** 2)
-            cb2 = np.sqrt((wall[1, 0] - pos[0] - robot_rad) ** 2 + (wall[1, 1] - pos[1] + robot_rad) ** 2)
-            if (ac2 + cb2 <= ab + eps) & (ac2 + cb2 >= ab - eps):
-                return True
-            ac3 = np.sqrt((wall[0, 0] - pos[0] + robot_rad) ** 2 + (wall[0, 1] - pos[1] - robot_rad) ** 2)
-            cb3 = np.sqrt((wall[1, 0] - pos[0] + robot_rad) ** 2 + (wall[1, 1] - pos[1] - robot_rad) ** 2)
-            if (ac3 + cb3 <= ab + eps) & (ac3 + cb3 >= ab - eps):
-                return True
-            ac4 = np.sqrt((wall[0, 0] - pos[0] - robot_rad) ** 2 + (wall[0, 1] - pos[1] + robot_rad) ** 2)
-            cb4 = np.sqrt((wall[1, 0] - pos[0] - robot_rad) ** 2 + (wall[1, 1] - pos[1] + robot_rad) ** 2)
-            if (ac4 + cb4 <= ab + eps) & (ac4 + cb4 >= ab - eps):
-                return True
+    # def collision(self, walls, pos):
+    #     robot_rad = self.robot_rad
+    #     eps = 0.01
+    #     for wall in walls:
+    #         ab = np.sqrt((wall[0, 0] - wall[1, 0]) ** 2 + (wall[0, 1] - wall[1, 1]) ** 2)
+
+    #         ac = np.sqrt((wall[0, 0] - pos[0] - robot_rad) ** 2 + (wall[0, 1] - pos[1] - robot_rad) ** 2)
+    #         cb = np.sqrt((wall[1, 0] - pos[0] - robot_rad) ** 2 + (wall[1, 1] - pos[1] - robot_rad) ** 2)
+    #         if (ac + cb <= ab + eps) & (ac + cb >= ab - eps):
+    #             return True
+
+    #         ac2 = np.sqrt((wall[0, 0] - pos[0] - robot_rad) ** 2 + (wall[0, 1] - pos[1] + robot_rad) ** 2)
+    #         cb2 = np.sqrt((wall[1, 0] - pos[0] - robot_rad) ** 2 + (wall[1, 1] - pos[1] + robot_rad) ** 2)
+    #         if (ac2 + cb2 <= ab + eps) & (ac2 + cb2 >= ab - eps):
+    #             return True
+    #         ac3 = np.sqrt((wall[0, 0] - pos[0] + robot_rad) ** 2 + (wall[0, 1] - pos[1] - robot_rad) ** 2)
+    #         cb3 = np.sqrt((wall[1, 0] - pos[0] + robot_rad) ** 2 + (wall[1, 1] - pos[1] - robot_rad) ** 2)
+    #         if (ac3 + cb3 <= ab + eps) & (ac3 + cb3 >= ab - eps):
+    #             return True
+    #         ac4 = np.sqrt((wall[0, 0] - pos[0] - robot_rad) ** 2 + (wall[0, 1] - pos[1] + robot_rad) ** 2)
+    #         cb4 = np.sqrt((wall[1, 0] - pos[0] - robot_rad) ** 2 + (wall[1, 1] - pos[1] + robot_rad) ** 2)
+    #         if (ac4 + cb4 <= ab + eps) & (ac4 + cb4 >= ab - eps):
+    #             return True
 
     # Initialise positions for 12 sensors
     def init_sensors(self, pos, theta):
