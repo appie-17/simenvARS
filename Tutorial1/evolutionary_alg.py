@@ -6,7 +6,7 @@ from time import time
 from multiprocessing import Pool
 from Simulation import Simulation
 
-def evolutionaryAlgorithm(num_iter, population_size, ndim, rn_range, benchmark_function, offspring):
+def evolutionaryAlgorithm(num_iter, population_size, ndim, rn_range, benchmark_function, offspring, graphics=False):
     # Initialise
     population = np.random.rand(population_size, ndim[0], ndim[1]) * rn_range[0] + rn_range[1]
     average_genotype = np.mean(population[0:], axis=0)
@@ -16,9 +16,10 @@ def evolutionaryAlgorithm(num_iter, population_size, ndim, rn_range, benchmark_f
     averages = np.zeros(num_iter)
     bests = np.zeros(num_iter)
     fitnesess = np.zeros((num_iter, population_size))
-    mutation_prob = 0.1
-    plt.figure(2)
-    plt.ion()
+    mutation_prob = 0.3
+    if graphics:
+        plt.figure(2)
+        plt.ion()
 
     for _ in range(num_iter):
         print(_)
@@ -55,12 +56,12 @@ def evolutionaryAlgorithm(num_iter, population_size, ndim, rn_range, benchmark_f
 
         averages[_] = fitness_all.mean()
         bests[_] = fitness_all.max()
-
-        plt.plot(bests[0:_ + 1], color="green")
-        plt.plot(averages[0:_ + 1], color="red")
-        plt.pause(3)
+        if graphics:
+            plt.plot(bests[0:_ + 1], color="green")
+            plt.plot(averages[0:_ + 1], color="red")
+            plt.pause(3)
         output = np.append(output, fitness)
-    return output
+    return output, population[fitness_all.argmax()]
 
 
 '''
@@ -69,7 +70,7 @@ Parameters to setup simulation for cleaning robot
 # Define range and starting point within square polygon environment
 env_range = 20
 # pos = np.random.rand(2,1)*6-3
-pos = np.array([2, 2])
+pos = np.array([10, 10])
 # Defin robot radius, sensor range, 1/dT for how many times to render simulation within one loop of robot controller
 robot_rad = 1
 sens_range = 3
@@ -97,7 +98,7 @@ avg = np.array(
 
 sim = Simulation(iter_sim, env_range, pos, robot_rad, sens_range, dT)
 
-output = evolutionaryAlgorithm(iter_ea, population_size, ndim, rn_range, sim.simulate, offspring)
+output = evolutionaryAlgorithm(iter_ea, population_size, ndim, rn_range, sim.simulate, offspring, True)
 print(output)
 
 fmt = '{:<15}{:<25}{:<25}{}'
