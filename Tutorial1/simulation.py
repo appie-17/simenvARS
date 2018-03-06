@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib import collections  as mc
 from matplotlib.colors import ListedColormap, BoundaryNorm
 from time import time
+from multiprocessing import Pool
 
 
 # Check if point c lies between line (a,b)
@@ -107,7 +108,7 @@ def ann(weights, v_left, v_right, sensor_output):
     input_vector = np.append(sensor_output, [v_left, v_right, 1])
     # print(input_vector)
     # multiply input_input vector by weights and put through tanh activation function
-    output = np.tanh(np.dot(weights, input_vector))
+    output = 1/(1+np.exp(-np.dot(weights, input_vector)))
     # return vector of 2x1; v_left = output[0][0] v_right = output[1][0]
     return output
 
@@ -170,7 +171,7 @@ def simulation(iter,env_range, pos, robot_rad, sens_range, dT, weights, graphics
             # When 1/dT=1 run controller and calculate new velocities according to old vel. and sensor output
         if (i * dT) % 1 == 0:
             Vl, Vr = ann(weights,Vl, Vr, sens_distance)
-    fitness = len(surface_covered) / (np.log(num_collisions) + 1)
+    fitness = len(surface_covered) / (np.log(num_collisions + 1) + 1)
     # plt.close()
     return fitness
 
@@ -184,7 +185,7 @@ def evolutionaryAlgorithm(num_iter, population_size, ndim, rn_range, benchmark_f
     averages = np.zeros(num_iter)
     bests = np.zeros(num_iter)
     fitnesess = np.zeros((num_iter, population_size))
-
+    mutation_prob = 0.1
     plt.figure(2)
     plt.ion()
 
@@ -206,9 +207,18 @@ def evolutionaryAlgorithm(num_iter, population_size, ndim, rn_range, benchmark_f
         population = population.repeat(round(1 / offspring), axis=0)
         # Crossover/Mutation
         for i in range(population_size):
-            population[i] = np.reshape(
-                [np.mean([population[i][j][k], population[np.random.randint(population.shape[0])][j][k]]) for j in
-                 range(population.shape[1]) for k in range(population.shape[2])], (2, 15))
+            if np.random.rand() < 0.2:
+                population[i] = np.reshape(
+                    [np.mean([population[i][j][k], population[np.random.randint(population.shape[0])][j][k]]) for j in
+                     range(population.shape[1]) for k in range(population.shape[2])], (2, 15))
+        for i in range(population_size):
+            if np.random.rand() < mutation_prob:
+                weight_index = np.random.randint(ndim[1])
+                layer_index = np.random.randint(ndim[0])
+                mutation = np.random.normal(loc=0, scale=rn_range[0]/10)
+                print("mutating {} at [{}][{}] with {}".format(i, layer_index, weight_index, mutation))
+                population[i][layer_index][weight_index] += mutation
+
         # Output
         average_genotype = np.mean(population[0:], axis=0)
         print('Average :', average_genotype)
@@ -229,20 +239,21 @@ def evolutionaryAlgorithm(num_iter, population_size, ndim, rn_range, benchmark_f
 Parameters to setup simulation for cleaning robot
 '''
 # Define range and starting point within square polygon environment
-env_range = 10
+env_range = 20
 # pos = np.random.rand(2,1)*6-3
 pos = np.array([2,2])
 # Defin robot radius, sensor range, 1/dT for how many times to render simulation within one loop of robot controller
-robot_rad = 0.5
-sens_range = 1
+robot_rad = 1
+sens_range = 3
 dT = 0.1
 np.random.seed(5)
 iter_sim = 500
+pool = Pool(processes=4)
 '''
 Parameters to setup evolutionary algorithm
 '''
 iter_ea = 100
-population_size = 50
+population_size = 100
 ndim = 2, 15
 rn_range = [10, -5]
 offspring = 0.5
@@ -256,7 +267,7 @@ avg = np.array(
 ,   0.43480835, -0.50853751 , 0.11581586]]
 )
 
-simulation(iter_sim,env_range, pos, robot_rad, sens_range, dT, weights=avg, graphics = True)
+simulation(iter_sim,env_range, pos, robot_rad, sens_range, dT, weights=avg, graphics = False)
 
 output = evolutionaryAlgorithm(iter_ea, population_size, ndim, rn_range, simulation, offspring)
 print(output)
