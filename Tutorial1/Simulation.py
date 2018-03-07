@@ -96,7 +96,7 @@ class Simulation:
             ICCx = x - R * np.sin(theta)
             ICCy = y + R * np.cos(theta)
             x = np.cos(omega * dT) * (x - ICCx) - np.sin(omega * dT) * (y - ICCy) + ICCx
-            y = np.sin(omega * dT) * (x - ICCy) + np.cos(omega * dT) * (y - ICCy) + ICCy
+            y = np.sin(omega * dT) * (x - ICCx) + np.cos(omega * dT) * (y - ICCy) + ICCy
             theta = theta + omega * dT
         pos_new = np.array([x, y])
         return pos_new, theta
@@ -142,6 +142,7 @@ class Simulation:
     def wall_distance(self, sensors, walls):
         distance = np.zeros(12)
         i = 0
+        sens_range = self.sens_range
         for sensor in sensors:
 
             for wall in walls:
@@ -163,7 +164,7 @@ class Simulation:
                 elif (Px < np.minimum(x3, x4)) | (Px > np.maximum(x3, x4)):
                     pass
                 else:
-                    distance[i] = np.sqrt((x1 - Px) ** 2 + (y1 - Py) ** 2)
+                    distance[i] = sens_range - (np.sqrt((x1 - Px) ** 2 + (y1 - Py) ** 2))
                     break
             i += 1
         return distance
