@@ -164,7 +164,7 @@ class Simulation:
             i += 1
         return distance
 
-    def ann(self, weights, v_left, v_right, sensor_output):
+    def ann(self, weights,v_left, v_right, sensor_output):
         """
         Neural network combining previous velocities and sensor distance outputs.
         (Trained) weights are multiplied with this combined vector.
@@ -174,10 +174,17 @@ class Simulation:
         :param weights: numpy matrix with shape (2, 14) and values [0, 1]
         :return: new velocities
         """
+        layers = weights.shape[0]
+        
         # append v_left and v_right to sensor_output and set correct shape
         input_vector = np.append(sensor_output, [v_left, v_right, 1])
+        #Calculate 10 node hidden layer with sigmoid activation
+        for l in range(layers-1):
+            
+            input_vector = 1 / (1+np.exp(-np.matmul(input_vector,weights[l])))
+        #Calculate output nodes by hyperbolic tangent activation
+        output = np.tanh(np.dot(input_vector,weights[layers-1]))
         # print(input_vector)
-        output = np.tanh(np.dot(weights,input_vector))
         # multiply input_input vector by weights and put through tanh activation function
         # output = 1 / (1 + np.exp(-np.dot(weights, input_vector)))
         # return vector of 2x1; v_left = output[0][0] v_right = output[1][0]
