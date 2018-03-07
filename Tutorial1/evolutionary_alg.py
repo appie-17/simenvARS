@@ -114,13 +114,17 @@ avg = np.array(
 
 sim = Simulation(iter_sim, env_range, pos, robot_rad, sens_range, dT)
 
-output = evolutionaryAlgorithm(iter_ea, population_size, ndim, rn_range, sim.simulate, offspring, True)
-print(output)
-f= open(str(int(time()))+".txt", "w")
-for i in range(len(output)):
-    f.write("\n####\n")
-    f.write(output[i])
+fitness, best_individual, diversities = evolutionaryAlgorithm(iter_ea, population_size, ndim, rn_range, sim.simulate, offspring, False)
 
+import os
+
+out_dir = "./output/{}".format(int(time()))
+if not os.path.exists(out_dir):
+    os.makedirs(out_dir, exist_ok=True)
+
+np.savetxt(out_dir + "/fit.csv", fitness, delimiter=",")
+np.savetxt(out_dir + "/best.csv", best_individual, delimiter=",")
+np.savetxt(out_dir + "/diversity.csv", diversities, delimiter=",")
 
 
 fmt = '{:<15}{:<25}{:<25}{}'
