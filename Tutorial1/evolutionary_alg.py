@@ -16,9 +16,12 @@ def evolutionaryAlgorithm(num_iter, population_size, ndim, rn_range, benchmark_f
     averages = np.zeros(num_iter)
     bests = np.zeros(num_iter)
     fitnesess = np.zeros((num_iter, population_size))
+    diversities = np.zeros(num_iter)
     mutation_prob = 0.3
     if graphics:
         plt.figure(2)
+        fitness_plt = plt.subplot(211)
+        div_plt = plt.subplot(212)
         plt.ion()
 
     for _ in range(num_iter):
@@ -29,6 +32,12 @@ def evolutionaryAlgorithm(num_iter, population_size, ndim, rn_range, benchmark_f
         fitness_all = np.array(pool.map(benchmark_function, population))
         print("time for experiments: {}".format(time() - sim_start))
         print('Fitness :', fitness_all)
+
+        diversity = 0
+        for i in range(population_size):
+            for j in range(i, population_size):
+                diversity += np.linalg.norm(population[i].flatten() - population[j].flatten())
+        print("diversity: {}".format(diversity))
         # Selection
         population = population[fitness_all.argsort()]
         population = np.flip(population, 0)
@@ -54,11 +63,16 @@ def evolutionaryAlgorithm(num_iter, population_size, ndim, rn_range, benchmark_f
         print('Average :', average_genotype)
         fitness = benchmark_function(average_genotype)
 
+
         averages[_] = fitness_all.mean()
         bests[_] = fitness_all.max()
+        diversities[_] = diversity
+
+
         if graphics:
-            plt.plot(bests[0:_ + 1], color="green")
-            plt.plot(averages[0:_ + 1], color="red")
+            fitness_plt.plot(bests[0:_ + 1], color="green")
+            fitness_plt.plot(averages[0:_ + 1], color="red")
+            div_plt.plot(diversities[0:_+1], color="orange")
             plt.pause(3)
         output = np.append(output, fitness)
     return output, population[fitness_all.argmax()]
@@ -76,7 +90,7 @@ robot_rad = 1
 sens_range = 3
 dT = 0.1
 np.random.seed(5)
-iter_sim = 500
+iter_sim = 1000
 pool = Pool(processes=4)
 '''
 Parameters to setup evolutionary algorithm
