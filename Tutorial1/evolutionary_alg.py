@@ -21,7 +21,9 @@ def evolutionaryAlgorithm(num_iter, population_size, ndim, rn_range, benchmark_f
     if graphics:
         plt.figure(2)
         fitness_plt = plt.subplot(211)
+        fitness_plt.set_title("fitness")
         div_plt = plt.subplot(212)
+        div_plt.set_title("diversity")
         plt.ion()
 
     for _ in range(num_iter):
@@ -75,7 +77,7 @@ def evolutionaryAlgorithm(num_iter, population_size, ndim, rn_range, benchmark_f
             div_plt.plot(diversities[0:_+1], color="orange")
             plt.pause(3)
         output = np.append(output, fitness)
-    return output, population[fitness_all.argmax()]
+    return output, population[fitness_all.argmax()], diversities
 
 
 '''
@@ -90,12 +92,12 @@ robot_rad = 1
 sens_range = 3
 dT = 0.1
 np.random.seed(5)
-iter_sim = 1000
+iter_sim = 500
 pool = Pool(processes=4)
 '''
 Parameters to setup evolutionary algorithm
 '''
-iter_ea = 100
+iter_ea = 10
 population_size = 100
 ndim = 2, 15
 rn_range = [10, -5]
@@ -114,6 +116,12 @@ sim = Simulation(iter_sim, env_range, pos, robot_rad, sens_range, dT)
 
 output = evolutionaryAlgorithm(iter_ea, population_size, ndim, rn_range, sim.simulate, offspring, True)
 print(output)
+f= open(str(int(time()))+".txt", "w")
+for i in range(len(output)):
+    f.write("\n####\n")
+    f.write(output[i])
+
+
 
 fmt = '{:<15}{:<25}{:<25}{}'
 print(fmt.format("Iteration", "Collisions", "Surface", "Fitness"))
