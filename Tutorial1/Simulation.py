@@ -22,8 +22,8 @@ class Simulation:
         env_range = self.env_range
         graphics = self.graphics
         # Set theta to viewing direction of robot
-        theta = np.arctan(pos[1] / pos[0])
-        # theta = 0
+        theta = 0
+        
         # add walls to 4x2x2d array, giving start- & end-coordinates
         # for each wall surrounding the environment
         walls = np.array([[[0, 0], [0, env_range]]])
@@ -51,7 +51,6 @@ class Simulation:
         for i in range(self.iter_sim):
             # Calculate new position and viewing angle according to velocities
             pos_old, theta_old = pos, theta
-
             pos, theta = self.movement(Vl, Vr, pos, theta)
             
             # Add unique positions to surface_covered
@@ -80,6 +79,7 @@ class Simulation:
             # if (i * self.dT) % 1 == 0:
             Vl, Vr = self.ann(weights, Vl, Vr, sens_distance)
         fitness = len(surface_covered) / (np.log(num_collisions + 1) + 1)
+        # print('Fitness :',fitness)
         
         return fitness
 
@@ -99,7 +99,7 @@ class Simulation:
             ICCx = x - R * np.sin(theta)
             ICCy = y + R * np.cos(theta)
             x = np.cos(omega * dT) * (x - ICCx) - np.sin(omega * dT) * (y - ICCy) + ICCx
-            y = np.sin(omega * dT) * (x - ICCy) + np.cos(omega * dT) * (y - ICCy) + ICCy
+            y = np.sin(omega * dT) * (x - ICCx) + np.cos(omega * dT) * (y - ICCy) + ICCy
             theta = theta + omega * dT
         pos_new = np.array([x, y])
         return pos_new, theta
@@ -114,14 +114,13 @@ class Simulation:
                 x1+=0.001
             distance = np.abs((y2-y1)*x0-(x2-x1)*y0+x2*y1-y2*x1)/np.sqrt((y2-y1)**2+(x2-x1)**2)
             if distance <= robot_rad:
-                # print('collision')
                 return True
 
     # Initialise positions for 12 sensors
     def init_sensors(self, pos, theta):
         robot_rad = self.robot_rad
         sens_range = self.sens_range
-
+        theta = theta 
         sensors = np.zeros([12, 2, 2])
         for i in range(len(sensors)):
             sensors[i] = [[pos[0] + np.sin(theta) * robot_rad,
@@ -133,6 +132,7 @@ class Simulation:
 
     def wall_distance(self, sensors, walls):
         distance = np.zeros(12)
+        sens_range = self.sens_range
         i = 0
         for sensor in sensors:
 
@@ -155,7 +155,7 @@ class Simulation:
                 elif (Px < np.minimum(x3, x4)) | (Px > np.maximum(x3, x4)):
                     pass
                 else:
-                    distance[i] = np.sqrt((x1 - Px) ** 2 + (y1 - Py) ** 2)
+                    distance[i] = sens_range - np.sqrt((x1 - Px) ** 2 + (y1 - Py) ** 2)
                     break
             i += 1
         return distance
