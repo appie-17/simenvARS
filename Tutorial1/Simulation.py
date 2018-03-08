@@ -4,7 +4,7 @@ from matplotlib import collections as mc
 
 class Simulation:
 
-    def __init__(self, iter_sim ,env_range, pos, robot_rad, sens_range, dT, graphics=False):
+    def __init__(self, iter_sim ,env_range, pos, robot_rad, sens_range, dT, fitness, graphics=False):
         self.graphics = graphics
         self.sens_range = sens_range
         self.robot_rad = robot_rad
@@ -12,7 +12,7 @@ class Simulation:
         self.dT = dT
         self.env_range = env_range
         self.iter_sim = iter_sim
-
+        self.fitness = fitness
 
     def simulate(self, weights):
         # Initialise velocities for right and left wheel of robot
@@ -77,10 +77,12 @@ class Simulation:
                 plt.pause(1e-40)
                 # When 1/dT=1 run controller and calculate new velocities according to old vel. and sensor output
             # if (i * self.dT) % 1 == 0:
+            # self.fitness.update()
             Vl, Vr = self.ann(weights, Vl, Vr, sens_distance)
+
+        # self.fitness.calculate()
         fitness = len(surface_covered) / (np.log(num_collisions + 1) + 1)
         # print('Fitness :',fitness)
-        
         return fitness
 
     def movement(self, Vl, Vr, pos, theta):
