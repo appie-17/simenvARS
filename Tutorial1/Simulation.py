@@ -26,14 +26,14 @@ class Simulation:
         
         # add walls to 4x2x2d array, giving start- & end-coordinates
         # for each wall surrounding the environment
-        walls = np.array([[[0, 0], [0, env_range]]])
-        walls = np.vstack((walls, np.array([[[0, 0], [env_range, 0]]])))
-        walls = np.vstack((walls, np.array([[[env_range, 0], [env_range, env_range]]])))
-        walls = np.vstack((walls, np.array([[[0, env_range], [env_range, env_range]]])))
-        # walls = np.vstack((walls, np.array([[[env_range/4, env_range/4], [env_range-env_range/4, env_range/4]]])))
-        # walls = np.vstack((walls, np.array([[[env_range/4, env_range/4], [env_range/4, env_range-env_range/4]]])))
-        # walls = np.vstack((walls, np.array([[[env_range/4, env_range-env_range/4], [env_range-env_range/4, env_range-env_range/4]]])))
-        # walls = np.vstack((walls, np.array([[[env_range-env_range/4, env_range-env_range/4], [env_range-env_range/4, env_range/4]]])))
+        walls = np.array([[[-env_range/2, -env_range/2], [-env_range/2, env_range/2]]])
+        walls = np.vstack((walls, np.array([[[-env_range/2, -env_range/2], [env_range/2, -env_range/2]]])))
+        walls = np.vstack((walls, np.array([[[env_range/2, -env_range/2], [env_range/2, env_range/2]]])))
+        walls = np.vstack((walls, np.array([[[-env_range/2, env_range/2], [env_range/2, env_range/2]]])))
+        walls = np.vstack((walls, np.array([[[-env_range/6, -env_range/6], [env_range/6, -env_range/6]]])))
+        walls = np.vstack((walls, np.array([[[-env_range/6, -env_range/6], [-env_range/6, env_range/6]]])))
+        walls = np.vstack((walls, np.array([[[-env_range/6, env_range/6], [env_range/6, env_range/6]]])))
+        walls = np.vstack((walls, np.array([[[env_range/6, env_range/6], [env_range/6, -env_range/6]]])))
 
         # Initialise variables to measure fitness
         num_collisions = 0
@@ -44,8 +44,8 @@ class Simulation:
         if graphics is True:
             plt.ion()
             ax = plt.subplot(111)
-            plt.xlim(-2, env_range+2)
-            plt.ylim(-2, env_range+2)
+            plt.xlim(-env_range/2-2, env_range/2+2)
+            plt.ylim(-env_range/2-2, env_range/2+2)
             lc_walls = mc.LineCollection(walls)
 
         for i in range(self.iter_sim):
@@ -66,8 +66,8 @@ class Simulation:
             sens_distance = self.wall_distance(sensors, walls)
             if graphics is True:
                 ax.clear()
-                _ = plt.xlim(-2, env_range+2)
-                _ = plt.ylim(-2, env_range+2)
+                _ = plt.xlim(-env_range/2-2, env_range/2+2)
+                _ = plt.ylim(-env_range/2-2, env_range/2+2)
                 robot = plt.Circle(pos, self.robot_rad)
                 linecolors = ['red' if i == 0 else 'blue' for i in range(12)]
                 lc_sensors = mc.LineCollection(sensors, colors=linecolors)
@@ -106,14 +106,42 @@ class Simulation:
 
     def collision(self,walls,pos):
         robot_rad = self.robot_rad
-        eps = 0.01
+        
         for wall in walls:
+        #Compute distance from position to linesegment (wall)    
             x0,y0 = pos[0],pos[1]
             x1,y1,x2,y2 = wall[0,0],wall[0,1],wall[1,0],wall[1,1]
-            if x1 == x2:
-                x1+=0.001
-            distance = np.abs((y2-y1)*x0-(x2-x1)*y0+x2*y1-y2*x1)/np.sqrt((y2-y1)**2+(x2-x1)**2)
-            if distance <= robot_rad:
+            # if x1 == x2:
+            #     x1+=0.001
+            # if y1 == y2:
+            #     y1+=0.001
+            px, py = x2-x1, y2-y1
+            u = ((x0-x1)*px+(y0-y1)*py)/(px*px+py*py)
+            if u > 1:
+                u = 1
+            elif u < 0:
+                u = 0
+            x,y = x1 + u*px, y1 + u*py
+            dx,dy = x-x0,y-y0
+            distance = np.sqrt(dx*dx+dy*dy)
+
+            # if x1 == x2:
+            #     x1+=0.001
+            # test = np.inner(u,v)/(np.linalg.norm(u)**2)
+            
+            # if test < 0:
+            #     distance = np.linalg.norm(p1-q)
+            # elif test > 1:
+            #     distance = np.linalg.norm(p2-q)
+            # else:
+                
+            #     p = p1 + np.inner(u,v)/np.linalg.norm(u)**2*u
+            #     distance = np.linalg.norm(q-p)
+                # distance = np.abs((y2-y1)*x0-(x2-x1)*y0+x2*y1-y2*x1)/np.sqrt((y2-y1)**2+(x2-x1)**2)
+            # distance = np.abs((y2-y1)*x0-(x2-x1)*y0+x2*y1-y2*x1)/np.sqrt((y2-y1)**2+(x2-x1)**2)
+            # distance = np.abs((x2-x1)*(y1-y0)-(x1-x0)*(y2-y1))/np.sqrt((x2-x1)**2+(y2-y1)**2)                
+            # print(distance)
+            if distance < robot_rad: #& ((x0>min(x1,x2))&(x0<max(x1,x2))):
                 return True
 
     # Initialise positions for 12 sensors
@@ -188,4 +216,5 @@ class Simulation:
         # multiply input_input vector by weights and put through tanh activation function
         # output = 1 / (1 + np.exp(-np.dot(weights, input_vector)))
         # return vector of 2x1; v_left = output[0][0] v_right = output[1][0]
+        
         return output

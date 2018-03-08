@@ -6,7 +6,7 @@ from time import time
 from multiprocessing import Pool
 from Simulation import Simulation
 
-def evolutionaryAlgorithm(num_iter, population_size, layers, ndim, rn_range, benchmark_function, offspring, graphics=False):
+def evolutionaryAlgorithm(num_iter, population_size, layers, ndim, rn_range, benchmark_function, offspring, crossover_prob, mutation_prob, graphics=False):
     # Initialise
     population = np.array([np.array([np.random.rand(ndim[l],ndim[l+1])* rn_range[0] + rn_range[1] for l in range(layers)]) for _ in range(population_size)])
     average_genotype = np.mean(population[:],axis=0)
@@ -17,7 +17,7 @@ def evolutionaryAlgorithm(num_iter, population_size, layers, ndim, rn_range, ben
     bests = np.zeros(num_iter)
     fitnesess = np.zeros((num_iter, population_size))
     diversities = np.zeros(num_iter)
-    mutation_prob = 0.3
+    
     if graphics:
         plt.figure(2)
         fitness_plt = plt.subplot(211)
@@ -52,7 +52,7 @@ def evolutionaryAlgorithm(num_iter, population_size, layers, ndim, rn_range, ben
         # Crossover/Mutation
         reshape= [0 for x in range(layers)]
         for i in range(population_size):
-            if np.random.rand() < 0.2:
+            if np.random.rand() < crossover_prob:
                 for l in range(layers):
                     reshape[l] = [ndim[l],ndim[l+1]]
                     population[i][l] = np.array([np.mean([population[i][l][j][k],population[np.random.randint(population_size)][l][j][k]]) for j in range(ndim[l]) for k in range(ndim[l+1])])
@@ -93,7 +93,7 @@ Parameters to setup simulation for cleaning robot
 # Define range and starting point within square polygon environment
 env_range = 20
 # pos = np.random.rand(2,1)*6-3
-pos = np.array([10, 10])
+pos = np.array([-6, -6])
 # Defin robot radius, sensor range, 1/dT for how many times to render simulation within one loop of robot controller
 robot_rad = 1
 sens_range = 3
@@ -114,10 +114,11 @@ ndim = [15,5,10,2]
 rn_range = [10, -5]
 #Selection criteria
 offspring = 0.5
-
+crossover = 0.2
+mutation = 0.3
 sim = Simulation(iter_sim, env_range, pos, robot_rad, sens_range, dT)
 
-fitness, best_individual, diversities = evolutionaryAlgorithm(iter_ea, population_size, layers, ndim, rn_range, sim.simulate, offspring, True)
+fitness, best_individual, diversities = evolutionaryAlgorithm(iter_ea, population_size, layers, ndim, rn_range, sim.simulate, offspring, crossover, mutation,True)
 print('Fitness :',fitness)
 print('Best :', best_individual)
 print('Diversities :',diversities)
