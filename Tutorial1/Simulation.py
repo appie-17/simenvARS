@@ -111,10 +111,7 @@ class Simulation:
         #Compute distance from position to linesegment (wall)    
             x0,y0 = pos[0],pos[1]
             x1,y1,x2,y2 = wall[0,0],wall[0,1],wall[1,0],wall[1,1]
-            # if x1 == x2:
-            #     x1+=0.001
-            # if y1 == y2:
-            #     y1+=0.001
+            
             px, py = x2-x1, y2-y1
             u = ((x0-x1)*px+(y0-y1)*py)/(px*px+py*py)
             if u > 1:
@@ -124,24 +121,7 @@ class Simulation:
             x,y = x1 + u*px, y1 + u*py
             dx,dy = x-x0,y-y0
             distance = np.sqrt(dx*dx+dy*dy)
-
-            # if x1 == x2:
-            #     x1+=0.001
-            # test = np.inner(u,v)/(np.linalg.norm(u)**2)
-            
-            # if test < 0:
-            #     distance = np.linalg.norm(p1-q)
-            # elif test > 1:
-            #     distance = np.linalg.norm(p2-q)
-            # else:
-                
-            #     p = p1 + np.inner(u,v)/np.linalg.norm(u)**2*u
-            #     distance = np.linalg.norm(q-p)
-                # distance = np.abs((y2-y1)*x0-(x2-x1)*y0+x2*y1-y2*x1)/np.sqrt((y2-y1)**2+(x2-x1)**2)
-            # distance = np.abs((y2-y1)*x0-(x2-x1)*y0+x2*y1-y2*x1)/np.sqrt((y2-y1)**2+(x2-x1)**2)
-            # distance = np.abs((x2-x1)*(y1-y0)-(x1-x0)*(y2-y1))/np.sqrt((x2-x1)**2+(y2-y1)**2)                
-            # print(distance)
-            if distance < robot_rad: #& ((x0>min(x1,x2))&(x0<max(x1,x2))):
+            if distance < robot_rad: 
                 return True
 
     # Initialise positions for 12 sensors
@@ -212,7 +192,7 @@ class Simulation:
             input_vector = 1 / (1+np.exp(-np.matmul(input_vector,weights[l])))
         #Calculate output nodes by hyperbolic tangent activation
         output = np.tanh(np.dot(input_vector,weights[layers-1]))
-        # print(input_vector)
+        
         # multiply input_input vector by weights and put through tanh activation function
         # output = 1 / (1 + np.exp(-np.dot(weights, input_vector)))
         # return vector of 2x1; v_left = output[0][0] v_right = output[1][0]

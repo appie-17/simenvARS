@@ -52,11 +52,11 @@ def evolutionaryAlgorithm(num_iter, population_size, layers, ndim, rn_range, ben
         # Crossover/Mutation
         reshape= [0 for x in range(layers)]
         for i in range(population_size):
-            if np.random.rand() < crossover_prob:
-                for l in range(layers):
-                    reshape[l] = [ndim[l],ndim[l+1]]
-                    population[i][l] = np.array([np.mean([population[i][l][j][k],population[np.random.randint(population_size)][l][j][k]]) for j in range(ndim[l]) for k in range(ndim[l+1])])
-                    population[i][l] = population[i][l].reshape(reshape[l])    
+                    if np.random.rand() < crossover_prob:
+                        for l in range(layers):
+                            reshape[l] = [ndim[l],ndim[l+1]]
+                            population[i][l] = np.reshape(np.array([np.mean([population[i][l][j][k],population[np.random.randint(population_size)][l][j][k]]) for j in range(ndim[l]) for k in range(ndim[l+1])]),reshape[l])
+                    # population[i][l] = population[i][l].reshape(reshape[l])    
                 
         for i in range(population_size):
             if np.random.rand() < mutation_prob:                
@@ -105,12 +105,12 @@ pool = Pool(processes=4)
 '''
 Parameters to setup evolutionary algorithm
 '''
-iter_ea = 10
+iter_ea = 1
 population_size = 100
 #Choose number of layers besides input layer, so hidden+output is 2 layers
-layers = 3
+layers = 2
 #Input layer 15 nodes(12sensors/2velocities/1bias), arbitrarely number of hidden nodes, 2 output nodes (velocities)
-ndim = [15,5,10,2]
+ndim = [15,10,2]
 rn_range = [10, -5]
 #Selection criteria
 offspring = 0.5
@@ -129,5 +129,24 @@ if not os.path.exists(out_dir):
     os.makedirs(out_dir, exist_ok=True)
 
 np.savetxt(out_dir + "/fit.csv", fitness, delimiter=",")
-np.savetxt(out_dir + "/best.csv", best_individual, delimiter=",")
 np.savetxt(out_dir + "/diversity.csv", diversities, delimiter=",")
+
+f = open(out_dir + '/weights.txt','wb')
+for node in best_individual:
+    np.savetxt(f,node,delimiter=',',footer='end_layer')
+
+
+f.close()
+
+#Function to import weights
+def tokenizer(fname):
+    with open(fname) as f:
+            weights= []
+            for line in f:
+                    if 'end_node' in line:
+                            yield weights                            
+                            weights = []
+                            continue
+                    weights.append(line)
+#Import weights                    
+weights = np.array([np.loadtxt(A,delimiter=',') for A in tokenizer('weights.txt')])
