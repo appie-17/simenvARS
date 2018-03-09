@@ -35,14 +35,15 @@ if __name__ == "__main__":
     crossover = 0.2
     mutation = 0.3
     #Selection choose between TruncatedRankBased(offspring)/Tournament(k)
-    selection = selectionreproduction.Tournament(10).apply
 
+    population_size = 100
     sim = Simulation(iter_sim, env_range, pos, robot_rad, sens_range, dT, fitness.OurFirstFitnessFunction)
 
     for k in [5, 10, 20]:
-        for offspring in [0.5, 0.25, 0.1]:
+        selection = selectionreproduction.Tournament(k).apply
+        for i in range(10):
 
-            print("###### running pop size {}".format(population_size))
+            print("###### run {} k {}".format(i, k))
 
             fitness, best_individual, diversities = evolutionaryAlgorithm(iter_ea, population_size, layers, ndim, rn_range,
                                                                           sim.simulate, crossover, mutation,
@@ -52,7 +53,34 @@ if __name__ == "__main__":
             print('Best :', best_individual)
             print('Diversities :', diversities)
 
-            out_dir = "./output/pop-size-{}"
+            out_dir = "./output/tournament-{}-run-{}".format(k, i)
+            if not os.path.exists(out_dir):
+                os.makedirs(out_dir, exist_ok=True)
+
+            np.savetxt(out_dir + "/fit.csv", fitness, delimiter=",")
+            np.savetxt(out_dir + "/diversity.csv", diversities, delimiter=",")
+
+            f = open(out_dir + '/weights.txt', 'wb')
+            for node in best_individual:
+                np.savetxt(f, node, delimiter=',', footer='end_layer')
+
+            f.close()
+    for offspring in [0.5, 0.25, 0.1]:
+        selection = selectionreproduction.TruncatedRankBased(offspring).apply
+        for i in range(10):
+
+            print("###### run {} offspring {}".format(i, offspring))
+
+            fitness, best_individual, diversities = evolutionaryAlgorithm(iter_ea, population_size, layers, ndim,
+                                                                          rn_range,
+                                                                          sim.simulate, crossover, mutation,
+                                                                          selection,
+                                                                          False)
+            print('Fitness :', fitness)
+            print('Best :', best_individual)
+            print('Diversities :', diversities)
+
+            out_dir = "./output/trunc-{}-run-{}".format(offspring, i)
             if not os.path.exists(out_dir):
                 os.makedirs(out_dir, exist_ok=True)
 
