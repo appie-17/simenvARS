@@ -83,18 +83,18 @@ class Simulation:
             sensors = self.init_sensors(pos, theta)
             sens_distance = self.wall_distance(sensors, walls)
             if graphics is True:
+                view = [[pos[0],pos[0]+np.cos(theta)*self.robot_rad],[pos[1],pos[1]+np.sin(theta)]*self.robot_rad]
                 ax.clear()
                 _ = plt.xlim(-env_range/2-2, env_range/2+2)
                 _ = plt.ylim(-env_range/2-2, env_range/2+2)
                 robot = plt.Circle(pos, self.robot_rad)
-                linecolors = ['red' if i == 0 else 'blue' for i in range(12)]
-                lc_sensors = mc.LineCollection(sensors, colors=linecolors)
+                lc_sensors = mc.LineCollection(sensors,linestyle='dotted')
                 _ = ax.add_artist(robot)
                 _ = ax.add_collection(lc_walls)
                 _ = ax.add_collection(lc_sensors)
+                _ = ax.plot(view[0],view[1],c='r')
                 plt.pause(1e-40)
                 # When 1/dT=1 run controller and calculate new velocities according to old vel. and sensor output
-            # if (i * self.dT) % 1 == 0:
             # self.fitness.update()
             Vl, Vr = self.ann(weights, Vl, Vr, sens_distance)
 
