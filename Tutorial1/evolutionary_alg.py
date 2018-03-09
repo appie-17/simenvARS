@@ -24,6 +24,7 @@ def evolutionaryAlgorithm(num_iter, population_size, layers, ndim, rn_range, ben
     fitnesess = np.zeros((num_iter, population_size))
     diversities = np.zeros(num_iter)
 
+
     if graphics:
         plt.figure(2)
         fitness_plt = plt.subplot(211)
@@ -40,6 +41,7 @@ def evolutionaryAlgorithm(num_iter, population_size, layers, ndim, rn_range, ben
         fitness_all = np.array(pool.map(benchmark_function, population))
         print("time for experiments: {}".format(time() - sim_start))
         print('Fitness :', fitness_all)
+        print("population: {}".format(population))
 
         diversity = 0
         for i in range(population_size):
