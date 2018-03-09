@@ -9,7 +9,7 @@ import fitness
 import selectionreproduction
 
 
-def evolutionaryAlgorithm(num_iter, population_size, layers, ndim, rn_range, benchmark_function, offspring,
+def evolutionaryAlgorithm(num_iter, population_size, layers, ndim, rn_range, benchmark_function, 
                           crossover_prob, mutation_prob, selection_method, graphics=False):
     # Initialise
     population = np.array(
@@ -106,13 +106,13 @@ if __name__ == "__main__":
     sens_range = 3
     dT = 0.1
     np.random.seed(5)
-    iter_sim = 500
+    iter_sim = 1000
     # Define number of threads/multi-core
     pool = Pool(processes=4)
     '''
     Parameters to setup evolutionary algorithm
     '''
-    iter_ea = 1
+    iter_ea = 100
     population_size = 100
     # Choose number of layers besides input layer, so hidden+output is 2 layers
     layers = 2
@@ -123,12 +123,14 @@ if __name__ == "__main__":
     offspring = 0.5
     crossover = 0.2
     mutation = 0.3
+    #Selection choose between TruncatedRankBased(offspring)/Tournament(k)
+    selection = selectionreproduction.Tournament(10).apply
+
     sim = Simulation(iter_sim, env_range, pos, robot_rad, sens_range, dT, fitness.OurFirstFitnessFunction)
 
     fitness, best_individual, diversities = evolutionaryAlgorithm(iter_ea, population_size, layers, ndim, rn_range,
-                                                                  sim.simulate, offspring, crossover, mutation,
-                                                                  selectionreproduction.TruncatedRankBased(
-                                                                      offspring).apply,
+                                                                  sim.simulate, crossover, mutation,
+                                                                  selection,
                                                                   True)
     print('Fitness :', fitness)
     print('Best :', best_individual)

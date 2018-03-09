@@ -26,15 +26,33 @@ class Simulation:
         
         # add walls to 4x2x2d array, giving start- & end-coordinates
         # for each wall surrounding the environment
-        walls = np.array([[[-env_range/2, -env_range/2], [-env_range/2, env_range/2]]])
-        walls = np.vstack((walls, np.array([[[-env_range/2, -env_range/2], [env_range/2, -env_range/2]]])))
-        walls = np.vstack((walls, np.array([[[env_range/2, -env_range/2], [env_range/2, env_range/2]]])))
-        walls = np.vstack((walls, np.array([[[-env_range/2, env_range/2], [env_range/2, env_range/2]]])))
-        walls = np.vstack((walls, np.array([[[-env_range/6, -env_range/6], [env_range/6, -env_range/6]]])))
-        walls = np.vstack((walls, np.array([[[-env_range/6, -env_range/6], [-env_range/6, env_range/6]]])))
-        walls = np.vstack((walls, np.array([[[-env_range/6, env_range/6], [env_range/6, env_range/6]]])))
-        walls = np.vstack((walls, np.array([[[env_range/6, env_range/6], [env_range/6, -env_range/6]]])))
+        #Map1
+        # walls = np.array([[[-env_range/2, -env_range/2], [-env_range/2, env_range/2]]])
+        # walls = np.vstack((walls, np.array([[[-env_range/2, -env_range/2], [env_range/2, -env_range/2]]])))
+        # walls = np.vstack((walls, np.array([[[env_range/2, -env_range/2], [env_range/2, env_range/2]]])))
+        # walls = np.vstack((walls, np.array([[[-env_range/2, env_range/2], [env_range/2, env_range/2]]])))
+        # walls = np.vstack((walls, np.array([[[-env_range/6, -env_range/6], [env_range/6, -env_range/6]]])))
+        # walls = np.vstack((walls, np.array([[[-env_range/6, -env_range/6], [-env_range/6, env_range/6]]])))
+        # walls = np.vstack((walls, np.array([[[-env_range/6, env_range/6], [env_range/6, env_range/6]]])))
+        # walls = np.vstack((walls, np.array([[[env_range/6, env_range/6], [env_range/6, -env_range/6]]])))
 
+        #Map2
+        walls = np.array([[[-env_range/2, -env_range/3], [-env_range/2, env_range/3]]])
+        walls = np.vstack((walls, np.array([[[-env_range/2, env_range/3], [-env_range/3, env_range/2]]])))
+        walls = np.vstack((walls, np.array([[[-env_range/3, env_range/2], [env_range/3, env_range/2]]])))
+        walls = np.vstack((walls, np.array([[[env_range/3, env_range/2], [env_range/2, env_range/3]]])))
+        walls = np.vstack((walls, np.array([[[env_range/2, env_range/3], [env_range/2, -env_range/3]]])))
+        walls = np.vstack((walls, np.array([[[env_range/2, -env_range/3], [env_range/3, -env_range/2]]])))
+        walls = np.vstack((walls, np.array([[[env_range/3, -env_range/2], [-env_range/3, -env_range/2]]])))
+        walls = np.vstack((walls, np.array([[[-env_range/3, -env_range/2], [-env_range/2, -env_range/3]]])))
+        walls = np.vstack((walls, np.array([[[-env_range/4, -env_range/4], [-env_range/4, env_range/4]]])))
+        walls = np.vstack((walls, np.array([[[-env_range/4, env_range/4], [-env_range/9, env_range/4]]])))
+        walls = np.vstack((walls, np.array([[[-env_range/9, env_range/4], [-env_range/9, -env_range/4]]])))
+        walls = np.vstack((walls, np.array([[[-env_range/9, -env_range/4], [-env_range/4, -env_range/4]]])))
+        walls = np.vstack((walls, np.array([[[env_range/4, -env_range/4], [env_range/4, env_range/4]]])))
+        walls = np.vstack((walls, np.array([[[env_range/4, env_range/4], [env_range/9, env_range/4]]])))
+        walls = np.vstack((walls, np.array([[[env_range/9, env_range/4], [env_range/9, -env_range/4]]])))
+        walls = np.vstack((walls, np.array([[[env_range/9, -env_range/4], [env_range/4, -env_range/4]]])))
         # Initialise variables to measure fitness
         num_collisions = 0
         x, y = np.asscalar(pos[0]), np.asscalar(pos[1])
@@ -44,8 +62,8 @@ class Simulation:
         if graphics is True:
             plt.ion()
             ax = plt.subplot(111)
-            plt.xlim(-env_range/2-2, env_range/2+2)
-            plt.ylim(-env_range/2-2, env_range/2+2)
+            plt.xlim(-env_range-2, env_range+2)
+            plt.ylim(-env_range-2, env_range+2)
             lc_walls = mc.LineCollection(walls)
 
         for i in range(self.iter_sim):
