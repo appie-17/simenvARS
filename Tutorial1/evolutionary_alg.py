@@ -23,7 +23,7 @@ def evolutionaryAlgorithm(num_iter, population_size, layers, ndim, rn_range, ben
     bests = np.zeros(num_iter)
     fitnesess = np.zeros((num_iter, population_size))
     diversities = np.zeros(num_iter)
-
+    pool = Pool(processes=4)
 
     if graphics:
         plt.figure(2)
@@ -109,8 +109,6 @@ if __name__ == "__main__":
     dT = 0.1
     np.random.seed(5)
     iter_sim = 1000
-    # Define number of threads/multi-core
-    pool = Pool(processes=4)
     '''
     Parameters to setup evolutionary algorithm
     '''
