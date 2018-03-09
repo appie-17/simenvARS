@@ -50,7 +50,7 @@ if __name__ == "__main__":
         print('Best :', best_individual)
         print('Diversities :', diversities)
 
-        out_dir = "./output/pop-size-{}"
+        out_dir = "./output/pop-size-{}".format(population_size)
         if not os.path.exists(out_dir):
             os.makedirs(out_dir, exist_ok=True)
 
