@@ -40,25 +40,26 @@ if __name__ == "__main__":
     sim = Simulation(iter_sim, env_range, pos, robot_rad, sens_range, dT, fitness.OurFirstFitnessFunction)
 
     for population_size in [20, 50, 100]:
-        print("###### running pop size {}".format(population_size))
+        for i in range(10):
+            print("###### run {} pop size {} ######".format(population_size, i))
 
-        fitness, best_individual, diversities = evolutionaryAlgorithm(iter_ea, population_size, layers, ndim, rn_range,
-                                                                      sim.simulate, crossover, mutation,
-                                                                      selection,
-                                                                      False)
-        print('Fitness :', fitness)
-        print('Best :', best_individual)
-        print('Diversities :', diversities)
+            fitness, best_individual, diversities = evolutionaryAlgorithm(iter_ea, population_size, layers, ndim, rn_range,
+                                                                          sim.simulate, crossover, mutation,
+                                                                          selection,
+                                                                          False)
+            print('Fitness :', fitness)
+            print('Best :', best_individual)
+            print('Diversities :', diversities)
 
-        out_dir = "./output/pop-size-{}".format(population_size)
-        if not os.path.exists(out_dir):
-            os.makedirs(out_dir, exist_ok=True)
+            out_dir = "./output/pop-size-{}-run-{}".format(population_size, i)
+            if not os.path.exists(out_dir):
+                os.makedirs(out_dir, exist_ok=True)
 
-        np.savetxt(out_dir + "/fit.csv", fitness, delimiter=",")
-        np.savetxt(out_dir + "/diversity.csv", diversities, delimiter=",")
+            np.savetxt(out_dir + "/fit.csv", fitness, delimiter=",")
+            np.savetxt(out_dir + "/diversity.csv", diversities, delimiter=",")
 
-        f = open(out_dir + '/weights.txt', 'wb')
-        for node in best_individual:
-            np.savetxt(f, node, delimiter=',', footer='end_layer')
+            f = open(out_dir + '/weights.txt', 'wb')
+            for node in best_individual:
+                np.savetxt(f, node, delimiter=',', footer='end_layer')
 
-        f.close()
+            f.close()
