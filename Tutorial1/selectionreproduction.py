@@ -19,7 +19,7 @@ class RankBased(SelectionReproduction):
         # individuals sorted from [individual with lowest fitness, ..., ind with highest fitness]
         population = population[fitness_all.argsort()]
         # reproduction:
-        result_pop = np.zeros(population.shape)
+        result_pop = np.copy(population)
         for i in range(population.shape[0]):
             rand_int = rnd.randrange(1, sum([x for x in range(1, population.shape[0] + 1)]))
             rank = population.shape[0]
@@ -74,7 +74,7 @@ class Tournament(SelectionReproduction):
         if self.k > population_size:
             raise Exception("k should <= population size")
         population = population[fitness_all.argsort()]
-        resulting_pop = np.zeros(population.shape)
+        resulting_pop = np.copy(population)
         # reproduction:
         for i in range(population_size):
             # tournament:
@@ -83,10 +83,17 @@ class Tournament(SelectionReproduction):
 
 
 if __name__ == "__main__":
-    pop_size = 10
-    fitness = np.random.randint(100, size=pop_size)
-    pop = np.random.rand(pop_size, 22, 3, 15, 12, 3)
-    # c = Tournament(5).apply(fitness, pop)
+    population_size = 10
+    # ndim = [15, 10, 2]
+    layers = 2
+    ndim = [5, 4, 2]
+    pop = np.array(
+        [np.array(
+            [np.random.rand(ndim[l], ndim[l + 1]) for l in range(layers)])
+            for _ in range(population_size)])
+    fitness = np.random.randint(100, size=population_size)
+    # pop = np.random.rand(population_size, 22, 3, 15, 12, 3)
+    c = Tournament(5).apply(fitness, pop)
     # c = RankBased().apply(fitness, pop)
-    c = TruncatedRankBased(0.3).apply(fitness, pop)
+    # c = TruncatedRankBased(0.3).apply(fitness, pop)
     print(c)

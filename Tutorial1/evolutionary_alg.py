@@ -49,7 +49,7 @@ def evolutionaryAlgorithm(num_iter, population_size, layers, ndim, rn_range, ben
         print("diversity: {}".format(diversity))
 
         # Selection & Reproduction
-        population = selection_method(population, fitness_all)
+        population = selection_method(fitness_all, population)
 
         best_genotype = population[0]
         print('Best :', best_genotype)
@@ -123,7 +123,7 @@ if __name__ == "__main__":
     offspring = 0.5
     crossover = 0.2
     mutation = 0.3
-    sim = Simulation(iter_sim, env_range, pos, robot_rad, sens_range, dT, fitness.OurFirstFitnessFunction())
+    sim = Simulation(iter_sim, env_range, pos, robot_rad, sens_range, dT, fitness.OurFirstFitnessFunction)
 
     fitness, best_individual, diversities = evolutionaryAlgorithm(iter_ea, population_size, layers, ndim, rn_range,
                                                                   sim.simulate, offspring, crossover, mutation,
@@ -148,6 +148,7 @@ if __name__ == "__main__":
 
     f.close()
 
+
     # Function to import weights
     def tokenizer(fname):
         with open(fname) as f:
@@ -158,6 +159,7 @@ if __name__ == "__main__":
                     weights = []
                     continue
                 weights.append(line)
+
 
     # Import weights
     weights = np.array([np.loadtxt(A, delimiter=',') for A in tokenizer('weights.txt')])
