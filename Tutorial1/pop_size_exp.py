@@ -41,7 +41,7 @@ if __name__ == "__main__":
 
     for population_size in [20, 50, 100]:
         for i in range(10):
-            print("###### run {} pop size {} ######".format(population_size, i))
+            print("###### run {} pop size {} ######".format(i, population_size))
 
             fitness, best_individual, diversities = evolutionaryAlgorithm(iter_ea, population_size, layers, ndim, rn_range,
                                                                           sim.simulate, crossover, mutation,
