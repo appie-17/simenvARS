@@ -37,7 +37,7 @@ if __name__ == "__main__":
     # Selection choose between TruncatedRankBased(offspring)/Tournament(k)
     selection = selectionreproduction.Tournament(10).apply
 
-    sim = Simulation(iter_sim, env_range, pos, robot_rad, sens_range, dT, fitness.OurFirstFitnessFunction)
+    sim = Simulation(iter_sim, env_range, pos, robot_rad, sens_range, dT, fitness.OurFirstFitnessFunction, 1)
     population_size = 60
 
     for i in range(10):

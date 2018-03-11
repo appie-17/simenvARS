@@ -4,7 +4,7 @@ from matplotlib import collections as mc
 
 
 class Simulation:
-    def __init__(self, iter_sim, env_range, pos, robot_rad, sens_range, dT, fitness, graphics=False):
+    def __init__(self, iter_sim, env_range, pos, robot_rad, sens_range, dT, fitness, graphics=False, m=2):
         self.graphics = graphics
         self.sens_range = sens_range
         self.robot_rad = robot_rad
@@ -13,6 +13,7 @@ class Simulation:
         self.env_range = env_range
         self.iter_sim = iter_sim
         self.fitness = fitness
+        self.m = m
 
     def simulate(self, weights):
         # Initialise velocities for right and left wheel of robot
@@ -27,32 +28,33 @@ class Simulation:
         # add walls to 4x2x2d array, giving start- & end-coordinates
         # for each wall surrounding the environment
         # Map1
-        # walls = np.array([[[-env_range/2, -env_range/2], [-env_range/2, env_range/2]]])
-        # walls = np.vstack((walls, np.array([[[-env_range/2, -env_range/2], [env_range/2, -env_range/2]]])))
-        # walls = np.vstack((walls, np.array([[[env_range/2, -env_range/2], [env_range/2, env_range/2]]])))
-        # walls = np.vstack((walls, np.array([[[-env_range/2, env_range/2], [env_range/2, env_range/2]]])))
-        # walls = np.vstack((walls, np.array([[[-env_range/6, -env_range/6], [env_range/6, -env_range/6]]])))
-        # walls = np.vstack((walls, np.array([[[-env_range/6, -env_range/6], [-env_range/6, env_range/6]]])))
-        # walls = np.vstack((walls, np.array([[[-env_range/6, env_range/6], [env_range/6, env_range/6]]])))
-        # walls = np.vstack((walls, np.array([[[env_range/6, env_range/6], [env_range/6, -env_range/6]]])))
-
+        if self.m == 1:
+            walls = np.array([[[-env_range/2, -env_range/2], [-env_range/2, env_range/2]]])
+            walls = np.vstack((walls, np.array([[[-env_range/2, -env_range/2], [env_range/2, -env_range/2]]])))
+            walls = np.vstack((walls, np.array([[[env_range/2, -env_range/2], [env_range/2, env_range/2]]])))
+            walls = np.vstack((walls, np.array([[[-env_range/2, env_range/2], [env_range/2, env_range/2]]])))
+            walls = np.vstack((walls, np.array([[[-env_range/6, -env_range/6], [env_range/6, -env_range/6]]])))
+            walls = np.vstack((walls, np.array([[[-env_range/6, -env_range/6], [-env_range/6, env_range/6]]])))
+            walls = np.vstack((walls, np.array([[[-env_range/6, env_range/6], [env_range/6, env_range/6]]])))
+            walls = np.vstack((walls, np.array([[[env_range/6, env_range/6], [env_range/6, -env_range/6]]])))
+        elif self.m == 2:
         # Map2
-        walls = np.array([[[-env_range / 2, -env_range / 3], [-env_range / 2, env_range / 3]]])
-        walls = np.vstack((walls, np.array([[[-env_range / 2, env_range / 3], [-env_range / 3, env_range / 2]]])))
-        walls = np.vstack((walls, np.array([[[-env_range / 3, env_range / 2], [env_range / 3, env_range / 2]]])))
-        walls = np.vstack((walls, np.array([[[env_range / 3, env_range / 2], [env_range / 2, env_range / 3]]])))
-        walls = np.vstack((walls, np.array([[[env_range / 2, env_range / 3], [env_range / 2, -env_range / 3]]])))
-        walls = np.vstack((walls, np.array([[[env_range / 2, -env_range / 3], [env_range / 3, -env_range / 2]]])))
-        walls = np.vstack((walls, np.array([[[env_range / 3, -env_range / 2], [-env_range / 3, -env_range / 2]]])))
-        walls = np.vstack((walls, np.array([[[-env_range / 3, -env_range / 2], [-env_range / 2, -env_range / 3]]])))
-        walls = np.vstack((walls, np.array([[[-env_range / 4, -env_range / 4], [-env_range / 4, env_range / 4]]])))
-        walls = np.vstack((walls, np.array([[[-env_range / 4, env_range / 4], [-env_range / 9, env_range / 4]]])))
-        walls = np.vstack((walls, np.array([[[-env_range / 9, env_range / 4], [-env_range / 9, -env_range / 4]]])))
-        walls = np.vstack((walls, np.array([[[-env_range / 9, -env_range / 4], [-env_range / 4, -env_range / 4]]])))
-        walls = np.vstack((walls, np.array([[[env_range / 4, -env_range / 4], [env_range / 4, env_range / 4]]])))
-        walls = np.vstack((walls, np.array([[[env_range / 4, env_range / 4], [env_range / 9, env_range / 4]]])))
-        walls = np.vstack((walls, np.array([[[env_range / 9, env_range / 4], [env_range / 9, -env_range / 4]]])))
-        walls = np.vstack((walls, np.array([[[env_range / 9, -env_range / 4], [env_range / 4, -env_range / 4]]])))
+            walls = np.array([[[-env_range / 2, -env_range / 3], [-env_range / 2, env_range / 3]]])
+            walls = np.vstack((walls, np.array([[[-env_range / 2, env_range / 3], [-env_range / 3, env_range / 2]]])))
+            walls = np.vstack((walls, np.array([[[-env_range / 3, env_range / 2], [env_range / 3, env_range / 2]]])))
+            walls = np.vstack((walls, np.array([[[env_range / 3, env_range / 2], [env_range / 2, env_range / 3]]])))
+            walls = np.vstack((walls, np.array([[[env_range / 2, env_range / 3], [env_range / 2, -env_range / 3]]])))
+            walls = np.vstack((walls, np.array([[[env_range / 2, -env_range / 3], [env_range / 3, -env_range / 2]]])))
+            walls = np.vstack((walls, np.array([[[env_range / 3, -env_range / 2], [-env_range / 3, -env_range / 2]]])))
+            walls = np.vstack((walls, np.array([[[-env_range / 3, -env_range / 2], [-env_range / 2, -env_range / 3]]])))
+            walls = np.vstack((walls, np.array([[[-env_range / 4, -env_range / 4], [-env_range / 4, env_range / 4]]])))
+            walls = np.vstack((walls, np.array([[[-env_range / 4, env_range / 4], [-env_range / 9, env_range / 4]]])))
+            walls = np.vstack((walls, np.array([[[-env_range / 9, env_range / 4], [-env_range / 9, -env_range / 4]]])))
+            walls = np.vstack((walls, np.array([[[-env_range / 9, -env_range / 4], [-env_range / 4, -env_range / 4]]])))
+            walls = np.vstack((walls, np.array([[[env_range / 4, -env_range / 4], [env_range / 4, env_range / 4]]])))
+            walls = np.vstack((walls, np.array([[[env_range / 4, env_range / 4], [env_range / 9, env_range / 4]]])))
+            walls = np.vstack((walls, np.array([[[env_range / 9, env_range / 4], [env_range / 9, -env_range / 4]]])))
+            walls = np.vstack((walls, np.array([[[env_range / 9, -env_range / 4], [env_range / 4, -env_range / 4]]])))
 
         # Initialise variables to measure fitness
         num_collisions = 0
