@@ -1,6 +1,7 @@
 import numpy as np
 
 
+# (Sebas Higler)
 class Fitness:
     def __init__(self, x, y, num_collisions):
         self.x = x

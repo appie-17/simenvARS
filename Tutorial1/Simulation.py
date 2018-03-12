@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import collections as mc
 
-
+# (Jordy van Appeven)
 class Simulation:
     def __init__(self, iter_sim, env_range, pos, robot_rad, sens_range, dT, fitness, graphics=False, m=2):
         self.graphics = graphics
@@ -29,16 +29,16 @@ class Simulation:
         # for each wall surrounding the environment
         # Map1
         if self.m == 1:
-            walls = np.array([[[-env_range/2, -env_range/2], [-env_range/2, env_range/2]]])
-            walls = np.vstack((walls, np.array([[[-env_range/2, -env_range/2], [env_range/2, -env_range/2]]])))
-            walls = np.vstack((walls, np.array([[[env_range/2, -env_range/2], [env_range/2, env_range/2]]])))
-            walls = np.vstack((walls, np.array([[[-env_range/2, env_range/2], [env_range/2, env_range/2]]])))
-            walls = np.vstack((walls, np.array([[[-env_range/6, -env_range/6], [env_range/6, -env_range/6]]])))
-            walls = np.vstack((walls, np.array([[[-env_range/6, -env_range/6], [-env_range/6, env_range/6]]])))
-            walls = np.vstack((walls, np.array([[[-env_range/6, env_range/6], [env_range/6, env_range/6]]])))
-            walls = np.vstack((walls, np.array([[[env_range/6, env_range/6], [env_range/6, -env_range/6]]])))
+            walls = np.array([[[-env_range / 2, -env_range / 2], [-env_range / 2, env_range / 2]]])
+            walls = np.vstack((walls, np.array([[[-env_range / 2, -env_range / 2], [env_range / 2, -env_range / 2]]])))
+            walls = np.vstack((walls, np.array([[[env_range / 2, -env_range / 2], [env_range / 2, env_range / 2]]])))
+            walls = np.vstack((walls, np.array([[[-env_range / 2, env_range / 2], [env_range / 2, env_range / 2]]])))
+            walls = np.vstack((walls, np.array([[[-env_range / 6, -env_range / 6], [env_range / 6, -env_range / 6]]])))
+            walls = np.vstack((walls, np.array([[[-env_range / 6, -env_range / 6], [-env_range / 6, env_range / 6]]])))
+            walls = np.vstack((walls, np.array([[[-env_range / 6, env_range / 6], [env_range / 6, env_range / 6]]])))
+            walls = np.vstack((walls, np.array([[[env_range / 6, env_range / 6], [env_range / 6, -env_range / 6]]])))
         elif self.m == 2:
-        # Map2
+            # Map2
             walls = np.array([[[-env_range / 2, -env_range / 3], [-env_range / 2, env_range / 3]]])
             walls = np.vstack((walls, np.array([[[-env_range / 2, env_range / 3], [-env_range / 3, env_range / 2]]])))
             walls = np.vstack((walls, np.array([[[-env_range / 3, env_range / 2], [env_range / 3, env_range / 2]]])))
@@ -205,6 +205,7 @@ class Simulation:
             i += 1
         return distance
 
+    # (Sebas Higler)
     def ann(self, weights, v_left, v_right, sensor_output):
         """
         Neural network combining previous velocities and sensor distance outputs.

@@ -5,6 +5,8 @@ import numpy as np
 from Simulation import Simulation
 from evolutionary_alg import evolutionaryAlgorithm
 
+
+# (Jan Lucas)
 if __name__ == "__main__":
     '''
     Parameters to setup simulation for cleaning robot

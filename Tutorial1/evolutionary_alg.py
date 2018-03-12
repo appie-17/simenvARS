@@ -9,9 +9,9 @@ import fitness
 import selectionreproduction
 
 
-def evolutionaryAlgorithm(num_iter, population_size, layers, ndim, rn_range, benchmark_function, 
+def evolutionaryAlgorithm(num_iter, population_size, layers, ndim, rn_range, benchmark_function,
                           crossover_prob, mutation_prob, selection_method, graphics=False):
-    # Initialise
+    # Initialise # (Jordy van Appeven)
     population = np.array(
         [np.array([np.random.rand(ndim[l], ndim[l + 1]) * rn_range[0] + rn_range[1] for l in range(layers)]) for _ in
          range(population_size)])
@@ -50,7 +50,7 @@ def evolutionaryAlgorithm(num_iter, population_size, layers, ndim, rn_range, ben
                     diversity += np.linalg.norm(population[i][l].flatten() - population[j][l].flatten())
         print("diversity: {}".format(diversity))
 
-        # Selection & Reproduction
+        # Selection & Reproduction # (Sebas Higler)
         population = selection_method(fitness_all, population)
 
         best_genotype = population[0]
@@ -85,6 +85,7 @@ def evolutionaryAlgorithm(num_iter, population_size, layers, ndim, rn_range, ben
         bests[_] = fitness_all.max()
         diversities[_] = diversity
 
+        # (Jordy van Appeven)
         if graphics:
             fitness_plt.plot(bests[0:_ + 1], color="green")
             fitness_plt.plot(averages[0:_ + 1], color="red")
@@ -123,7 +124,7 @@ if __name__ == "__main__":
     offspring = 0.5
     crossover = 0.2
     mutation = 0.3
-    #Selection choose between TruncatedRankBased(offspring)/Tournament(k)
+    # Selection choose between TruncatedRankBased(offspring)/Tournament(k)
     selection = selectionreproduction.Tournament(10).apply
 
     sim = Simulation(iter_sim, env_range, pos, robot_rad, sens_range, dT, fitness.OurFirstFitnessFunction)
@@ -137,6 +138,7 @@ if __name__ == "__main__":
     print('Diversities :', diversities)
     import os
 
+    # (Jan Lucas)
     out_dir = "./output/{}".format(int(time()))
     if not os.path.exists(out_dir):
         os.makedirs(out_dir, exist_ok=True)

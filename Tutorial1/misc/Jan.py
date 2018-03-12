@@ -1,9 +1,12 @@
-import numpy as np
+from datetime import datetime
+
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D
-from datetime import datetime
-from benchmarks import rastrigin, rosenbrock
+
+from misc.benchmarks import rastrigin
+
 
 # works for both vectors and atomic values
 # todo extend to more than 2 dimensions
