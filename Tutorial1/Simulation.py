@@ -72,8 +72,8 @@ class Simulation:
             kalman.updateKalmanFilter(pos,theta)
             
             if graphics is True:
-                view = [[pos[0], pos[0] + np.cos(-theta) * self.robot_rad],
-                        [pos[1], pos[1] + np.sin(-theta)] * self.robot_rad]
+                view = [[pos[0], pos[0] - np.cos(theta) * self.robot_rad],
+                        [pos[1], pos[1] - np.sin(theta) * self.robot_rad]]
                 ax.clear()
                 
                 
