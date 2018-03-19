@@ -40,7 +40,7 @@ class Simulation:
         # Initialize instance of fitness class:
         # self.fitness = self.fitness(x, y, num_collisions)
         #Initialize alpha's for kalmanFilter
-        alphas = [0.1,0.1,0.1,0.1]
+        alphas = [0.01,0.01,0.01,0.01]
         localization_iter = 5
         kalman = localization.kalmanFilter(self.map,pos,theta,alphas)
         # Run simulation
@@ -55,7 +55,7 @@ class Simulation:
             
             pos_old, theta_old = pos, theta
             pos, theta = self.movement(Vl, Vr, pos, theta)
-
+            
             # Add unique positions to surface_covered
             x, y = np.asscalar(pos[0]), np.asscalar(pos[1])
             surface_covered.add((np.round(x), np.round(y)))
@@ -78,7 +78,8 @@ class Simulation:
                 
                 
                 for j in range(localization_iter):
-                    robot = plt.Circle(kalman.sampleKalmanFilter(),self.robot_rad)
+                    robot = plt.Circle(kalman.sampleKalmanFilter(),self.robot_rad,fill=False)
+                    # print(kalman.sampleKalmanFilter())
                     _ = ax.add_artist(robot)    
                 lc_sensors = mc.LineCollection(sensors, linestyle='dotted')
                 robot = plt.Circle(pos, self.robot_rad)
@@ -138,6 +139,8 @@ class Simulation:
             y = np.sin(omega * dT) * (x - ICCx) + np.cos(omega * dT) * (y - ICCy) + ICCy
             theta = theta + omega * dT
         pos_new = np.array([x, y])
+        theta = theta % (2*np.pi)
+        
         return pos_new, theta
 
     def collision(self, walls, pos):
