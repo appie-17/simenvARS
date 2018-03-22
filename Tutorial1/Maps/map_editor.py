@@ -178,13 +178,13 @@ class MapEditor:
             np.save(self.out_dir + 'Map_' + str(time.time()), self.lines)
 
     def load(self, name=None):
-        if name is None:
-            list_of_files = glob.glob(self.out_dir + '*.npy')  # * means all if need specific format then *.csv
-            if len(list_of_files) == 0:
-                print('I can\'t load, the Folder is empty!')
-                return
-            latest_file = max(list_of_files, key=os.path.getctime)
-            name = latest_file.split('\\')[1]
+        # if name is None:
+            # list_of_files = glob.glob(self.out_dir + '*.npy')  # * means all if need specific format then *.csv
+            # if len(list_of_files) == 0:
+            #     print('I can\'t load, the Folder is empty!')
+            #     return
+            # latest_file = max(list_of_files, key=os.path.getctime)
+            # name = latest_file.split('\\')[1]
 
         stuff = np.load(self.out_dir + name)
         self.lines = []
@@ -207,7 +207,7 @@ class Point(object):
 
 # map = MapEditor(15)
 map = MapEditor(20) # without any border
-map.load()
+# map.load()
 
 map.plot_editor()
 

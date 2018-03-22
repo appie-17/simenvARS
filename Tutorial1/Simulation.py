@@ -5,29 +5,29 @@ import localization
 
 # (Jordy van Appeven)
 class Simulation:
-    def __init__(self, iter_sim, env_range, pos, robot_rad, sens_range, dT, fitness, sim_map, graphics=False):
+    def __init__(self, iter_sim, env_range, robot_rad, sens_range, dT, fitness, graphics=False):
         self.graphics = graphics
         self.sens_range = sens_range
         self.robot_rad = robot_rad
-        self.pos = pos
         self.dT = dT
         self.env_range = env_range
         self.iter_sim = iter_sim
         self.fitness = fitness
-        self.map = sim_map
+        self.map = None
+        self.pos = None
 
-    def simulate(self, weights):
+    def simulate(self, weights, sim_map, pos):
         # Initialise velocities for right and left wheel of robot
         Vl = 0
         Vr = 0
-        # locations = np.array([[-6,-6],[6,-6],[6,6],[-6,6],[0,0]])
-        pos = self.pos
-        # pos = locations[np.random.randint(locations.shape[0])]
-        # pos = np.array([0,0])
+        self.pos = pos
+        
+        
         env_range = self.env_range
         graphics = self.graphics
         # add walls to 4x2x2d array, giving start- & end-coordinates
         # for each wall surrounding the environment
+        self.map = sim_map
         walls = self.map
         # Set theta to viewing direction of robot
         theta = 0
@@ -72,15 +72,16 @@ class Simulation:
             kalman.updateKalmanFilter(pos,theta)
             
             if graphics is True:
-                view = [[pos[0], pos[0] - np.cos(theta) * self.robot_rad],
-                        [pos[1], pos[1] - np.sin(theta) * self.robot_rad]]
+                view = [[pos[0], pos[0] + np.cos(theta) * self.robot_rad],
+                        [pos[1], pos[1] + np.sin(theta) * self.robot_rad]]
                 ax.clear()
-                
-                
+                robot_self = plt.Circle(kalman.state,self.robot_rad,color='r')
+                _ = ax.add_artist(robot_self)
                 for j in range(localization_iter):
+                    
                     robot = plt.Circle(kalman.sampleKalmanFilter(),self.robot_rad,fill=False)
-                    # print(kalman.sampleKalmanFilter())
                     _ = ax.add_artist(robot)    
+
                 lc_sensors = mc.LineCollection(sensors, linestyle='dotted')
                 robot = plt.Circle(pos, self.robot_rad)
                 _ = ax.add_artist(robot)
@@ -108,12 +109,7 @@ class Simulation:
             else: 
                 col_dist = 0
             fitness += (abs(Vl)+abs(Vr)) * (1-np.sqrt(abs(Vl-Vr)))*(1-col_dist)
-            # print((1-col_dist))
-            # print((abs(Vl)+abs(Vr)))
-            # print((1-np.sqrt(abs(Vl-Vr)))**2)
-            # print((1-np.sqrt(np.linalg.norm(Vl-Vr))))
-            # print(fitness/i)
-            # print(i)
+            
         # Calculate final fitness:
         # fitness = self.fitness.calculate()
         # fitness = len(surface_covered) / (np.log(num_collisions + 1) + 1)
@@ -168,13 +164,13 @@ class Simulation:
     def init_sensors(self, pos, theta):
         eps = 0.0001
         robot_rad = self.robot_rad-eps
-        sens_range = self.sens_range#+1*eps
+        sens_range = self.sens_range
         sensors = np.zeros([12, 2, 2])
         for i in range(len(sensors)):
-            sensors[i] = [[pos[0] + np.sin(theta) * robot_rad,
-                           pos[1] + np.cos(theta) * robot_rad],
-                          [pos[0] + np.sin(theta) * (robot_rad + sens_range),
-                           pos[1] + np.cos(theta) * (robot_rad + sens_range)]]
+            sensors[i] = [[pos[0] + np.cos(theta) * robot_rad,
+                           pos[1] + np.sin(theta) * robot_rad],
+                          [pos[0] + np.cos(theta) * (robot_rad + sens_range),
+                           pos[1] + np.sin(theta) * (robot_rad + sens_range)]]
             theta += 1 / 6 * np.pi
         return sensors
 
@@ -207,10 +203,10 @@ class Simulation:
                 elif (Px < np.minimum(x3, x4)) | (Px > np.maximum(x3, x4)):
                     pass
                 else:
-                    distance[i] = sens_range-(np.sqrt((x1 - Px) ** 2 + (y1 - Py) ** 2)) #+0.32
+                    distance[i] = sens_range-(np.sqrt((x1 - Px) ** 2 + (y1 - Py) ** 2)) 
                     break
             i += 1
-        # print(distance)
+        
         return distance
 
     # (Sebas Higler)
@@ -233,13 +229,11 @@ class Simulation:
             input_vector = 1 / (1 + np.exp(-np.matmul(input_vector, weights[l])))
         # Calculate output nodes by hyperbolic tangent activation
         # output = np.tanh(np.dot(input_vector, weights[layers - 1]))
-        # print(input_vector)
+        
         # multiply input_input vector by weights and put through tanh activation function
         output = 1 / (1 + np.exp(-np.matmul(input_vector, weights[layers - 1])))
         # return vector of 2x1; v_left = output[0][0] v_right = output[1][0]
-        # print(output)
-        output = output-0.5
-        # print(output)
-        # output = [-0.5,-0.5]
-        # print(output)
+        
+        output = output-0.5        
+        
         return output

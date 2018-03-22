@@ -12,9 +12,6 @@ import selectionreproduction
 def evolutionaryAlgorithm(num_iter, population_size, layers, ndim, rn_range, benchmark_function,
                           crossover_prob, mutation_prob, selection_method, graphics=False):
     # Initialise # (Jordy van Appeven)
-    # population = np.array(
-    #     [np.array([np.random.rand(ndim[l], ndim[l + 1]) * rn_range[0] + rn_range[1] for l in range(layers)]) for _ in
-    #      range(population_size)])
     population = np.array(
         [np.array([np.random.normal(size=(ndim[l], ndim[l + 1]),loc=0, scale=rn_range[0]) for l in range(layers)]) for _ in
          range(population_size)])
@@ -83,16 +80,11 @@ def evolutionaryAlgorithm(num_iter, population_size, layers, ndim, rn_range, ben
                 for w in range(ndim[l]*ndim[l+1]):
                     if np.random.rand() < mutation_prob:
                         mut+=1
-                        # layer_index = np.random.randint(layers)
-                        # print(layer_index)
                         weight_index = np.random.randint(ndim[l]), np.random.randint(ndim[l + 1])
                         mutation = np.random.normal(loc=0, scale=rn_range[0])
-                        # print("mutating {} at [{}][{}] with {}".format(i, l, weight_index, mutation))
                         population[i][l][weight_index] += mutation
         print('Crossover :',cross)
-        print('Mutation : ',mut)
-        
-        
+        print('Mutation : ',mut)                
 
         # (Jordy van Appeven)
         if graphics:
@@ -117,7 +109,6 @@ if __name__ == "__main__":
     robot_rad = 1
     sens_range = 3
     dT = 1/3
-    # np.random.seed(5)
     iter_sim = 500
     '''
     Parameters to setup evolutionary algorithm
@@ -135,7 +126,7 @@ if __name__ == "__main__":
     mutation = 0.05
     # Selection choose between TruncatedRankBased(offspring)/Tournament(k)
     selection = selectionreproduction.Tournament(8).apply
-
+    #Define map
     sim_map = np.load('Maps/'+'Map1'+'.npy')
     sim = Simulation(iter_sim, env_range, pos, robot_rad, sens_range, dT, fitness.OurFirstFitnessFunction,sim_map)
 
@@ -161,17 +152,3 @@ if __name__ == "__main__":
         np.savetxt(f, node, delimiter=',', footer='end_layer')
 
     f.close()
-
-    # Function to import weights
-    def tokenizer(fname):
-        with open(fname) as f:
-            weights = []
-            for line in f:
-                if 'end_node' in line:
-                    yield weights
-                    weights = []
-                    continue
-                weights.append(line)
-
-    # Import weights
-    weights = np.array([np.loadtxt(A, delimiter=',') for A in tokenizer('weights.txt')])
