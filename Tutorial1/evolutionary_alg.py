@@ -4,6 +4,7 @@ from matplotlib import collections  as mc
 from matplotlib.colors import ListedColormap, BoundaryNorm
 from time import time
 from multiprocessing import Pool
+from functools import partial
 from Simulation import Simulation
 import fitness
 import selectionreproduction
@@ -33,15 +34,15 @@ def evolutionaryAlgorithm(num_iter, population_size, layers, ndim, rn_range, ben
         plt.ion()
 
     for _ in range(num_iter):
-        locations = np.array([[-6,-6],[6,-6],[6,6],[-6,6],[0,0]])
+        locations = np.array([[3,5],[17.5,3],[3,17]])
         pos = locations[np.random.randint(locations.shape[0])]
+        sim_map = np.load('Maps/'+'Map3'+'.npy')
         
-        benchmark_function.pos = pos
         print(_)
         # Evaluation
         fitness_all = []
         sim_start = time()
-        fitness_all = np.array(pool.map(benchmark_function.simulate, population))
+        fitness_all = np.array(pool.map(partial(benchmark_function.simulate,sim_map=sim_map,pos=pos), population))
         print("time for experiments: {}".format(time() - sim_start))
         print('Fitness :', fitness_all)
 
@@ -113,7 +114,7 @@ if __name__ == "__main__":
     '''
     Parameters to setup evolutionary algorithm
     '''
-    iter_ea = 300
+    iter_ea = 100
     population_size = 100
     # Choose number of layers besides input layer, so hidden+output is 2 layers
     layers = 1
@@ -126,9 +127,9 @@ if __name__ == "__main__":
     mutation = 0.05
     # Selection choose between TruncatedRankBased(offspring)/Tournament(k)
     selection = selectionreproduction.Tournament(8).apply
-    #Define map
-    sim_map = np.load('Maps/'+'Map1'+'.npy')
-    sim = Simulation(iter_sim, env_range, pos, robot_rad, sens_range, dT, fitness.OurFirstFitnessFunction,sim_map)
+    
+    
+    sim = Simulation(iter_sim, env_range, robot_rad, sens_range, dT, fitness.OurFirstFitnessFunction)
 
     fitness, best_individual, diversities = evolutionaryAlgorithm(iter_ea, population_size, layers, ndim, rn_range,
                                                                   sim, crossover, mutation,
@@ -137,6 +138,7 @@ if __name__ == "__main__":
     print('Fitness :', fitness)
     print('Best :', best_individual)
     print('Diversities :', diversities)
+    
     import os
 
     # (Jan Lucas)

@@ -16,22 +16,20 @@ class Simulation:
         self.map = None
         self.pos = None
 
-    def simulate(self, weights, sim_map, pos):
+    def simulate(self, weights, sim_map, pos,localiz=0):
         # Initialise velocities for right and left wheel of robot
         Vl = 0
         Vr = 0
         self.pos = pos
-        
-        
+        # Set theta to viewing direction of robot
+        theta = 0
         env_range = self.env_range
         graphics = self.graphics
         # add walls to 4x2x2d array, giving start- & end-coordinates
         # for each wall surrounding the environment
         self.map = sim_map
         walls = self.map
-        # Set theta to viewing direction of robot
-        theta = 0
-
+        
         # Initialise variables to measure fitness
         num_collisions = 0
         x, y = np.asscalar(pos[0]), np.asscalar(pos[1])
@@ -40,9 +38,9 @@ class Simulation:
         # Initialize instance of fitness class:
         # self.fitness = self.fitness(x, y, num_collisions)
         #Initialize alpha's for kalmanFilter
-        alphas = [0.01,0.01,0.01,0.01]
+
         localization_iter = 5
-        kalman = localization.kalmanFilter(self.map,pos,theta,alphas)
+        kalman = localization.extendedKalmanFilter(self.map,pos,theta,0.,0.,0.,0.,0.1,0.1)
         # Run simulation
         if graphics is True:
             plt.figure(1)
@@ -54,7 +52,7 @@ class Simulation:
             # Calculate new position and viewing angle according to velocities
             
             pos_old, theta_old = pos, theta
-            pos, theta = self.movement(Vl, Vr, pos, theta)
+            pos, theta = self.movement(Vl, Vr,pos, theta)
             
             # Add unique positions to surface_covered
             x, y = np.asscalar(pos[0]), np.asscalar(pos[1])
@@ -66,21 +64,23 @@ class Simulation:
                 Vl,Vr = 0,0
             sensors = self.init_sensors(pos, theta)
             sens_distance = self.wall_distance(sensors, walls)
-            # Define 12 sensors each separated by 30 deg,2pi/12rad and calculate distance to any object
-            
-            #Update kalmanFilter
-            kalman.updateKalmanFilter(pos,theta)
+            # Define 12 sensors each separated by 30 deg,2pi/12rad and calculate distance to any object                    
             
             if graphics is True:
                 view = [[pos[0], pos[0] + np.cos(theta) * self.robot_rad],
                         [pos[1], pos[1] + np.sin(theta) * self.robot_rad]]
-                ax.clear()
-                robot_self = plt.Circle(kalman.state,self.robot_rad,color='r')
-                _ = ax.add_artist(robot_self)
-                for j in range(localization_iter):
-                    
-                    robot = plt.Circle(kalman.sampleKalmanFilter(),self.robot_rad,fill=False)
-                    _ = ax.add_artist(robot)    
+                ax.clear()                
+                
+                #Update kalmanFilter
+                if localiz==1:
+                    kalman.updateKalmanFilter(pos,theta)
+                    # kalman.updateKalmanFilter(Vl,Vr,pos,theta)
+                    robot_self = plt.Circle(kalman.state,self.robot_rad,color='r')
+                    _ = ax.add_artist(robot_self)
+                    for j in range(localization_iter):
+                        # print(kalman.sampleKalmanFilter())
+                        robot = plt.Circle(kalman.sampleKalmanFilter(),self.robot_rad,fill=False)
+                        _ = ax.add_artist(robot)    
 
                 lc_sensors = mc.LineCollection(sensors, linestyle='dotted')
                 robot = plt.Circle(pos, self.robot_rad)
