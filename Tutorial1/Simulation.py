@@ -40,7 +40,8 @@ class Simulation:
         #Initialize alpha's for kalmanFilter
 
         localization_iter = 5
-        kalman = localization.extendedKalmanFilter(self.map,pos,theta,0.,0.,0.,0.,0.1,0.1)
+        # kalman = localization.kalmanFilter(self.map,pos,theta,.01,0.01,0.01,0.01,.80,.80)
+        kalman = localization.extendedKalmanFilter(self.map,pos,theta,.1,0.1,0.1,0.1,.000,.000)
         # Run simulation
         if graphics is True:
             plt.figure(1)
@@ -79,7 +80,7 @@ class Simulation:
                     _ = ax.add_artist(robot_self)
                     for j in range(localization_iter):
                         # print(kalman.sampleKalmanFilter())
-                        robot = plt.Circle(kalman.sampleKalmanFilter(),self.robot_rad,fill=False)
+                        robot = plt.Circle(kalman.sampleFilter(),self.robot_rad,fill=False)
                         _ = ax.add_artist(robot)    
 
                 lc_sensors = mc.LineCollection(sensors, linestyle='dotted')
