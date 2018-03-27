@@ -1,5 +1,10 @@
 import numpy as np
 from Simulation import Simulation
+'''
+Run this script to test controller in simulation environment with localization filter.
+Localization filter is included by flag 'localiz=1', either kalmanFilter() 
+or extendedKalmanFilter can be selected in simulation script.
+'''
 
 # Defin robot radius, sensor range, 1/dT for how many times to render simulation within one loop of robot controller
 env_range = 20
@@ -42,29 +47,8 @@ pos = locations[np.random.randint(locations.shape[0])]
 weights = np.array([np.loadtxt(A,delimiter=',') for A in tokenizer('weights_map4.txt')])
 sim = Simulation(iter_sim, env_range, robot_rad, sens_range, dT, None, graphics = True)
 sim.simulate(weights, sim_map, pos,localiz=1)
-#Test on any map
-sim_map = np.load('Maps/'+'Map3'+'.npy')
-locations = np.array([[3,5],[17.5,3],[3,17]])
-pos = locations[np.random.randint(locations.shape[0])]   
-weights = np.array(
-[[[-1.04746922,  1.41313515],
-  [ 0.07980493, -0.71853415],
-  [-0.89241298,  0.30547098],
-  [-0.36028469,  0.82745653],
-  [-2.42469271, -0.10056928],
-  [ 1.64762453, -0.70256259],
-  [ 1.60205111,  0.09800635],
-  [ 4.09033603, -0.30117652],
-  [ 0.91532369, -0.64346112],
-  [-0.56963408, -2.22844021],
-  [-2.67422521, -0.39716665],
-  [-0.82585395, -1.48817701],
-  [-1.70141903,  1.44971092],
-  [ 0.39313447,  1.32933255],
-  [ 0.29463374, -0.56627154]]]
-	)
-sim = Simulation(iter_sim, env_range, robot_rad, sens_range, dT, None, graphics = True)
-sim.simulate(weights, sim_map, pos,localiz=1)
+
+
 
 
 

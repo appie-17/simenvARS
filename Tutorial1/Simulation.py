@@ -37,11 +37,12 @@ class Simulation:
         fitness = 0
         # Initialize instance of fitness class:
         # self.fitness = self.fitness(x, y, num_collisions)
-        #Initialize alpha's for kalmanFilter
-
+        
+        #Define kalmanFilter localization samples, 4 alpha's,r_std and phi_std \
+        #for either kalmanFilter() or extendedKalmanFilter() from module localization
         localization_iter = 5
-        # kalman = localization.kalmanFilter(self.map,pos,theta,.01,0.01,0.01,0.01,.80,.80)
-        kalman = localization.extendedKalmanFilter(self.map,pos,theta,.1,0.1,0.1,0.1,.000,.000)
+        kalman = localization.kalmanFilter(self.map,pos,theta,.89,0.89,0.89,0.89,20.01,20.1)
+        # kalman = localization.extendedKalmanFilter(self.map,pos,theta,.1,0.1,0.1,0.1,.000,.000)
         # Run simulation
         if graphics is True:
             plt.figure(1)
