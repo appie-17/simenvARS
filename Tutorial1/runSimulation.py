@@ -6,6 +6,8 @@ Localization filter is included by flag 'localiz=1', either kalmanFilter()
 or extendedKalmanFilter can be selected in simulation script.
 '''
 
+# Jan Lucas
+
 # Defin robot radius, sensor range, 1/dT for how many times to render simulation within one loop of robot controller
 env_range = 20
 robot_rad = 1

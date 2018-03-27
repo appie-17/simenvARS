@@ -8,7 +8,7 @@ class localization:
 		
 	def sampleFilter(self):
 		return np.random.multivariate_normal(self.state, self.state_cov)
-
+    # Andrea Sica
 	def updateLandmarkInSight(self, pos, max_distance=100):
 		self.landmarksInSight = []
 		for mark in self.landmarks:
@@ -27,7 +27,7 @@ class localization:
 					break
 			if in_sign:
 				self.landmarksInSight.append(mark)
-
+    # Ruhui Zhao
 	def updateOdometryMotion(self, pos, theta):
 
 		def odometryMotion(pos, theta):
@@ -55,7 +55,8 @@ class localization:
 		
 		self.state = np.array(self.state) + np.array([dx, dy, dtheta])		
 		self.state_cov = self.state_cov + self.R
-		
+
+# Sebas Higler and Jan Lucas
 class kalmanFilter(localization):
     def __init__(self, map, pos, theta, alpha1,alpha2,alpha3,alpha4,r_std,phi_std):
         self.landmarks = map.reshape(map.shape[0] * map.shape[1], 2)
@@ -169,6 +170,7 @@ class kalmanFilter(localization):
         sensorModel = self.triangulation(beacons,pos,theta)
         return sensorModel    
 
+# Jordy van Appeven
 class extendedKalmanFilter(localization):
     def __init__(self, map, pos, theta, alpha1, alpha2, alpha3, alpha4, r_std, phi_std):
         self.landmarks = map.reshape(map.shape[0] * map.shape[1], 2)
